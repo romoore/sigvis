@@ -1,0 +1,13 @@
+# Directories
+bin
+target
+
+# File types
+*.class
+*.log
+*.svch
+
+# Specific files
+.classpath
+.settings
+.project
