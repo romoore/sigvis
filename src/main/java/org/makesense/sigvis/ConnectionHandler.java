@@ -56,14 +56,13 @@ public class ConnectionHandler {
   public void setClientConnection(String host, int port) {
     if (this.wmc != null) {
       this.disconnectAsClient();
-    }else{
-      this.wmc = new ClientWorldConnection();
+
     }
-    
-    this.clientHost = host;
+    this.wmc = new ClientWorldConnection();
+
     this.clientPort = port;
+    this.clientHost = host;
     this.wmc.setHost(host);
-   
     this.wmc.setPort(port);
 
   }
@@ -117,8 +116,13 @@ public class ConnectionHandler {
     }
 
     if (this.wmc != null) {
-      this.wmc.disconnect();
-      
+      try {
+        this.wmc.disconnect();
+      } catch (Exception e) {
+        log.error("Exception while disconnecting from world model.", e);
+      } finally {
+        this.wmc = null;
+      }
     }
   }
 
@@ -169,7 +173,7 @@ public class ConnectionHandler {
           }
         }
       } catch (Exception e) {
-        System.err.println("Couldn't retrieve dimension data for " + uri);
+        log.error("Couldn't retrieve dimension data for {}", uri);
 
       }
 
@@ -177,7 +181,7 @@ public class ConnectionHandler {
         if (this.cache != null) {
           this.cache
               .setRegionBounds(new Rectangle2D.Double(0, 0, width, height));
-          System.out.println("Set region bounds.");
+          log.info("Set region bounds: {},{}", width, height);
         }
       }
       if (imageUrlString != null) {
@@ -195,8 +199,7 @@ public class ConnectionHandler {
             conn.connect();
             regionImage = ImageIO.read(conn.getInputStream());
             this.cache.setRegionImage(regionImage);
-            System.out.println("Set image for " + uri + " as \"" + imageUrl
-                + "\".");
+            log.info("Set image for {}: \"{}\".", uri, imageUrl);
           }
 
         } catch (MalformedURLException e) {
@@ -331,7 +334,7 @@ public class ConnectionHandler {
     public void run() {
       main: while (this.keepRunning) {
         log.info("Requesting average RSSI values.");
-        
+
         if (this.handler.wmc == null) {
           log.info("RSSI Handler exiting.");
 
