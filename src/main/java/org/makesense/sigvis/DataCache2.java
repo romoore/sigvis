@@ -706,7 +706,10 @@ public class DataCache2 implements Cloneable {
     this.regionUri = null;
     this.regionImage = null;
     this.fiduciaryTransmitterIds.clear();
+    this.numFidTxers = 0;
+    
     this.receiverIds.clear();
+    this.numRxers = 0;
     
     log.info("Region info and device locations cleared from cache.");
   }
@@ -733,7 +736,7 @@ public class DataCache2 implements Cloneable {
       item.clear();
     }
     this.averageRssiByRByT.clear();
-
+    
     for (String rxer : this.varianceRssiByRByT.keySet()) {
       Map<String, Deque<ChartItem<Float>>> item = this.varianceRssiByRByT
           .get(rxer);
@@ -750,6 +753,7 @@ public class DataCache2 implements Cloneable {
       item.clear();
     }
     this.varianceRssiByRByT.clear();
+    
 
     for (String rxer : this.sigToDistHistory.keySet()) {
       Deque<SignalToDistanceItem> deque = this.sigToDistHistory.get(rxer);
