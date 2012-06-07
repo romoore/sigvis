@@ -59,12 +59,12 @@ import org.makesense.sigvis.structs.ChartItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LineChart extends JComponent implements DisplayPanel, MouseListener,
-    MouseMotionListener, MouseWheelListener {
+public class LineChart extends JComponent implements DisplayPanel,
+    MouseListener, MouseMotionListener, MouseWheelListener {
 
   private static final Logger log = LoggerFactory.getLogger(LineChart.class);
 
-  private static final long MAX_TIME_GAP = 2000l;
+  protected static final long MAX_TIME_GAP = 2000l;
 
   protected static final int DEFAULT_MARGIN = 20;
 
@@ -73,17 +73,17 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
   protected static final int MARGIN_BOTTOM = 2;
   protected static final int MARGIN_LEFT = 3;
 
-  protected int[] margins = { DEFAULT_MARGIN*2, DEFAULT_MARGIN,
+  protected int[] margins = { DEFAULT_MARGIN * 2, DEFAULT_MARGIN,
       DEFAULT_MARGIN * 2, DEFAULT_MARGIN * 2 };
 
   // protected int maxElements = 100;
 
   // Default to 30 seconds so as not to draw too much
   protected long maxAge = 30000;
-  
+
   // Minimum of 10 seconds
   protected static final long MIN_DISPLAY_AGE = 10000;
-  
+
   protected static final long DISPAY_AGE_STEP = 5000;
 
   public long getMaxAge() {
@@ -223,7 +223,7 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
     this.upArrowImg = ImageResources.IMG_UP_ARROW;
     this.downArrowImg = ImageResources.IMG_DOWN_ARROW;
     // TODO: Uncomment the below to support dragging x-axis (time)
-//    this.addMouseMotionListener(this);
+    // this.addMouseMotionListener(this);
     this.addMouseListener(this);
     this.addMouseWheelListener(this);
     if (this.cache.isClone()) {
@@ -255,7 +255,6 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
           RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
-    
     int screenWidth = this.getWidth();
     int screenHeight = this.getHeight();
 
@@ -296,25 +295,22 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
       float bright = 0.95f;
       drawColor = new Color(Color.HSBtoRGB(hue, sat, bright));
       g2.setColor(drawColor);
+
       // TODO: Grab variance list instead
-      List<ChartItem<Float>> sampleList = null;
-      if (this.type == ValueType.RSSI) {
-        sampleList = this.deviceIsTransmitter ? this.cache.getRssiList(
-            streamId, this.displayedId) : this.cache.getRssiList(
-            this.displayedId, streamId);
-      } else if (this.type == ValueType.VARIANCE) {
-        sampleList = this.deviceIsTransmitter ? this.cache.getVarianceList(
-            streamId, this.displayedId) : this.cache.getVarianceList(
-            this.displayedId, streamId);
-      }
+      Collection<ChartItem<Float>> sampleList = this.generateDisplayedData(
+          this.deviceIsTransmitter ? this.displayedId : streamId,
+          this.deviceIsTransmitter ? streamId: this.displayedId);
+
       ++streamNum;
       if (sampleList == null || sampleList.isEmpty()) {
-        
+
         continue;
       }
-      
-      float tempMax = this
-          .drawStream(g2, sampleList, screenWidth, screenHeight);
+
+      float tempMax = this.deviceIsTransmitter ? this.drawStream(g2, streamId,
+          this.displayedId, sampleList, screenWidth, screenHeight) : this
+          .drawStream(g2, this.displayedId, streamId, sampleList, screenWidth,
+              screenHeight);
       if (tempMax > newMax) {
         newMax = tempMax;
       }
@@ -336,13 +332,11 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
     this.drawChartBorders(g2, screenWidth, screenHeight);
     this.drawStatsValues(g2, screenWidth, screenHeight);
     this.drawTimestamp(g2, screenWidth, screenHeight);
-     g2.setColor(origColor);
-     g2.setComposite(origComposite);
+    g2.setColor(origColor);
+    g2.setComposite(origComposite);
 
     long renderTime = System.currentTimeMillis() - this.lastRepaint;
     this.currFps = this.currFps * 0.875f + (1000f / renderTime) * 0.125f;
-
-    
 
     // if (this.enableAntiAliasing && (this.currFps < this.minFps * 0.9f)) {
     // ++this.slowFrames;
@@ -353,6 +347,16 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
     // } else if (this.enableAntiAliasing) {
     // this.slowFrames = 0;
     // }
+  }
+
+  protected Collection<ChartItem<Float>> generateDisplayedData(String txer,
+      String rxer) {
+    if (this.type == ValueType.RSSI) {
+      return this.cache.getRssiList(rxer, txer);
+    } else if (this.type == ValueType.VARIANCE) {
+      return this.cache.getVarianceList(rxer, txer);
+    }
+    return null;
   }
 
   protected void drawAdjustInfo(Graphics g, int screenWidth, int screenHeight) {
@@ -503,12 +507,14 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
       float bright = Float.NaN;
       if (this.type == ValueType.RSSI) {
         bright = this.deviceIsTransmitter ? this.cache.getRssiAt(
-            this.displayedId, streamId,this.timeOffset, this.maxAge) : this.cache.getRssiAt(streamId,
-            this.displayedId, this.timeOffset,this.maxAge);
+            this.displayedId, streamId, this.timeOffset, this.maxAge)
+            : this.cache.getRssiAt(streamId, this.displayedId, this.timeOffset,
+                this.maxAge);
       } else if (this.type == ValueType.VARIANCE) {
         bright = this.deviceIsTransmitter ? this.cache.getVarianceAt(
-            this.displayedId, streamId, this.timeOffset, this.maxAge) : this.cache.getVarianceAt(
-            streamId, this.displayedId, this.timeOffset, this.maxAge);
+            this.displayedId, streamId, this.timeOffset, this.maxAge)
+            : this.cache.getVarianceAt(streamId, this.displayedId,
+                this.timeOffset, this.maxAge);
       }
 
       if (bright >= this.minValue) {
@@ -526,40 +532,45 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
 
     this.legendHeight = currentYLine - this.margins[MARGIN_TOP] + stringHeight;
   }
-  
-  protected void drawTimestamp(final Graphics2D g2, int screenWidth, int screenHeight){
+
+  protected void drawTimestamp(final Graphics2D g2, int screenWidth,
+      int screenHeight) {
     FontRenderContext frc = g2.getFontRenderContext();
     Font currentFont = g2.getFont();
-    
+
     Color origColor = g2.getColor();
     g2.setColor(this.axisTextColor);
     // Draw current timestamp
-    long timestamp = this.cache.isClone() ? this.cache.getCreationTs() : System.currentTimeMillis() ;
+    long timestamp = this.cache.isClone() ? this.cache.getCreationTs() : System
+        .currentTimeMillis();
     timestamp -= this.timeOffset;
-    
-    String dateString = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM, SimpleDateFormat.MEDIUM).format(new Date(timestamp));
+
+    String dateString = SimpleDateFormat.getDateTimeInstance(
+        SimpleDateFormat.MEDIUM, SimpleDateFormat.MEDIUM).format(
+        new Date(timestamp));
     Rectangle2D bounds = currentFont.getStringBounds(dateString, frc);
-    
-    g2.drawString(dateString,screenWidth-this.margins[MARGIN_RIGHT]-(float)bounds.getWidth(),this.margins[MARGIN_TOP]-(float)bounds.getHeight()-2);
+
+    g2.drawString(dateString, screenWidth - this.margins[MARGIN_RIGHT]
+        - (float) bounds.getWidth(),
+        this.margins[MARGIN_TOP] - (float) bounds.getHeight() - 2);
     g2.setColor(origColor);
   }
 
-  protected float drawStream(final Graphics g,
-      final Collection<ChartItem<Float>> streamValues, final int screenWidth,
-      final int screenHeight) {
-    
+  protected float drawStream(final Graphics g, final String rxer,
+      final String txer, final Collection<ChartItem<Float>> streamValues,
+      final int screenWidth, final int screenHeight) {
+
     if (streamValues == null) {
-      
+
       return this.minValue;
     }
     boolean containsMax = false;
 
-//    ChartItem<Float>[] items = streamValues.toArray(new ChartItem[] {});
+    // ChartItem<Float>[] items = streamValues.toArray(new ChartItem[] {});
     if (streamValues.size() == 0) {
-      
+
       return this.minValue;
     }
-    
 
     // long startTime = items[0].getCreationTime();
     // long endTime = items[items.length - 1].getCreationTime();
@@ -599,22 +610,22 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
     boolean isFirst = true;
 
     float maxValue = this.minValue;
-    
+
     long youngestItem = this.lastRepaint - this.timeOffset;
-    if(this.cache.isClone()){
+    if (this.cache.isClone()) {
       youngestItem = this.cache.getCreationTs() - this.timeOffset;
     }
-    long oldestItem = youngestItem  - this.maxAge ;
+    long oldestItem = youngestItem - this.maxAge;
 
-//    long youngestAgeDraw = this.lastRepaint - (long) this.timeOffset;
-//    if(this.cache.isClone()){
-//      youngestAgeDraw= this.cache.getCreationTs() - (long)this.timeOffset;
-//    }
-//    long oldestAgeDraw = youngestAgeDraw - this.maxAge;
+    // long youngestAgeDraw = this.lastRepaint - (long) this.timeOffset;
+    // if(this.cache.isClone()){
+    // youngestAgeDraw= this.cache.getCreationTs() - (long)this.timeOffset;
+    // }
+    // long oldestAgeDraw = youngestAgeDraw - this.maxAge;
     long lastItemTime = 0l;
-    GeneralPath itemPath= new GeneralPath();
+    GeneralPath itemPath = new GeneralPath();
     for (ChartItem<Float> item : streamValues) {
-      
+
       // if (this.scrolling) {
       if (item.getCreationTime() < oldestItem) {
         continue;
@@ -622,7 +633,7 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
       if (item.getCreationTime() > youngestItem) {
         break;
       }
-//      System.out.println("Just right!");
+      // System.out.println("Just right!");
       if (item.getValue() > maxValue) {
         maxValue = item.getValue();
       }
@@ -655,25 +666,25 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
 
       // Draw a line from the previous point
       if (previousXLocation >= 0) {
-        
+
         itemPath.lineTo(itemXLocation,
             (baseYLevel - (item.getValue() - this.minValue) * valueScale));
-        
-//        g2.drawLine((int) previousXLocation,
-//            (int) (baseYLevel - (previousItem.getValue() - this.minValue)
-//                * valueScale), (int) itemXLocation,
-//            (int) (baseYLevel - (item.getValue() - this.minValue) * valueScale));
-      }else{
+
+        // g2.drawLine((int) previousXLocation,
+        // (int) (baseYLevel - (previousItem.getValue() - this.minValue)
+        // * valueScale), (int) itemXLocation,
+        // (int) (baseYLevel - (item.getValue() - this.minValue) * valueScale));
+      } else {
         itemPath.moveTo(itemXLocation,
             (baseYLevel - (item.getValue() - this.minValue) * valueScale));
       }
 
       // Draw the point if we should
-//      if (this.drawPoints) {
-//        Ellipse2D point = new Ellipse2D.Float(itemXLocation - 1f, baseYLevel
-//            - (item.getValue() - this.minValue) * valueScale - 1f, 2, 2);
-//        g2.fill(point);
-//      }
+      // if (this.drawPoints) {
+      // Ellipse2D point = new Ellipse2D.Float(itemXLocation - 1f, baseYLevel
+      // - (item.getValue() - this.minValue) * valueScale - 1f, 2, 2);
+      // g2.fill(point);
+      // }
 
       // Prepare for next iteration
       previousXLocation = itemXLocation;
@@ -683,7 +694,7 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
     }
 
     g2.draw(itemPath);
-    
+
     if (this.useTransparency && xValues.size() > 0) {
       xValues.add(Integer.valueOf((int) previousXLocation));
       yValues.add(Integer.valueOf(baseYLevel));
@@ -780,11 +791,8 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
         g2.drawLine((int) screenX, screenHeight - this.margins[MARGIN_BOTTOM],
             (int) screenX, (int) (this.margins[MARGIN_TOP] + this.legendHeight));
         g2.setColor(this.axisTextColor);
-        g2.drawString(
-            String
-                .format(
-                    "%d",
-                    (long) (verticalLine - earliestTime + this.timeOffset) / 1000),
+        g2.drawString(String.format("%d",
+            (long) (verticalLine - earliestTime + this.timeOffset) / 1000),
             screenX, screenHeight - this.margins[MARGIN_BOTTOM] / 2f);
       }
     }
@@ -906,7 +914,7 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
   protected Point mouseDragStart = null;
 
   protected long timeOffset = 0l;
-  
+
   protected long desiredTimeOffset = 0l;
 
   @Override
@@ -985,7 +993,7 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
 
   @Override
   public boolean supportsTransparency() {
-    return this.type == DataCache2.ValueType.VARIANCE;
+    return true;// this.type == DataCache2.ValueType.VARIANCE;
   }
 
   @Override
@@ -993,19 +1001,18 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
     // Negative is up/away from user -> zoom in
     // Positive value is down/toward user -> zoom out
     int clicks = arg0.getWheelRotation();
-    
+
     long cacheAge = this.cache.getMaxCacheAge();
-    
+
     long historyChange = clicks * DISPAY_AGE_STEP;
     long maxAge = this.maxAge;
     maxAge += historyChange;
-    if(maxAge > cacheAge){
+    if (maxAge > cacheAge) {
       maxAge = cacheAge;
-    }
-    else if(maxAge < this.MIN_DISPLAY_AGE){
+    } else if (maxAge < this.MIN_DISPLAY_AGE) {
       maxAge = this.MIN_DISPLAY_AGE;
     }
-    
+
     this.maxAge = maxAge;
     this.timeOffset = this.desiredTimeOffset;
     if (this.timeOffset > (this.cache.getMaxCacheAge() - this.maxAge)) {
@@ -1018,7 +1025,7 @@ public class LineChart extends JComponent implements DisplayPanel, MouseListener
   }
 
   public void setTimeOffset(long timeOffset) {
-    this.timeOffset =this.desiredTimeOffset = timeOffset;
+    this.timeOffset = this.desiredTimeOffset = timeOffset;
     if (this.timeOffset < 0) {
       this.timeOffset = 0;
     } else if (this.timeOffset > (this.cache.getMaxCacheAge() - this.maxAge)) {

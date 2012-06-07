@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -65,6 +66,7 @@ import org.makesense.sigvis.panels.DisplayPanel;
 import org.makesense.sigvis.panels.HeatStripes;
 import org.makesense.sigvis.panels.IntersectionLineMap;
 import org.makesense.sigvis.panels.LineChart;
+import org.makesense.sigvis.panels.RssiStDvLineChart;
 import org.makesense.sigvis.panels.SignalLineMap;
 import org.makesense.sigvis.panels.SignalToDistanceMap;
 import org.makesense.sigvis.panels.VoronoiHeatMap;
@@ -206,12 +208,16 @@ public class SimpleFrame extends JFrame implements ActionListener,
   protected JMenu visualizationMenu = new JMenu("Visualizations");
 
   protected JMenu dataMenu = new JMenu("Data");
+  
+  protected JMenu helpMenu = new JMenu("Help");
+  
+  protected JMenuItem helpAbout = new JMenuItem("About...");
 
   protected JMenuItem clearCache = new JMenuItem("Clear Cache");
 
   protected JMenuItem cloneCache = new JMenuItem("Clone Cache");
 
-  protected JMenuItem statsCache = new JMenuItem("Cache Info");
+  protected JMenuItem statsCache = new JMenuItem("Cache Info...");
 
   protected JMenuItem saveCache = new JMenuItem("Save Cache...");
 
@@ -233,6 +239,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   protected JRadioButtonMenuItem visualizeVarianceLines = new JRadioButtonMenuItem(
       "Var. Lines");
+  
+  protected JRadioButtonMenuItem visualizeRssiStDvLines = new JRadioButtonMenuItem("RSSI+Var. Lines");
 
   protected JRadioButtonMenuItem visualizeSignalRings = new JRadioButtonMenuItem(
       "RSSI Rings");
@@ -404,6 +412,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationMenu.add(this.visualizeVarianceStripes);
     this.visualizationMenu.add(this.visualizeRssiLineMap);
     this.visualizationMenu.add(this.visualizeVarLineMap);
+    
 
     // TODO: Pretty sure this isn't a useful plot, but no sense in removing it
     // entirely.
@@ -411,7 +420,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationMenu.add(this.visualizeVarIntersect);
     this.visualizationMenu.add(this.visualizeMaxRssiMap);
     this.visualizationMenu.add(this.visualizeMaxVarianceMap);
-
+    this.visualizationMenu.add(visualizeRssiStDvLines);
+    
     this.visualizeRssiBars.addActionListener(this);
     this.visualizeVarianceBars.addActionListener(this);
     this.visualizeRssiVoronoi.addActionListener(this);
@@ -427,6 +437,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizeVarIntersect.addActionListener(this);
     this.visualizeMaxRssiMap.addActionListener(this);
     this.visualizeMaxVarianceMap.addActionListener(this);
+    this.visualizeRssiStDvLines.addActionListener(this);
 
     this.visualizeRssiBars.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
         acceleratorMask));
@@ -474,6 +485,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationGroup.add(this.visualizeVarIntersect);
     this.visualizationGroup.add(this.visualizeMaxRssiMap);
     this.visualizationGroup.add(this.visualizeMaxVarianceMap);
+    this.visualizationGroup.add(this.visualizeRssiStDvLines);
 
     this.menu.add(this.visualizationMenu);
 
@@ -497,6 +509,10 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.dataMenu.add(this.clearCache);
 
     this.menu.add(this.dataMenu);
+    
+    this.helpMenu.add(this.helpAbout);
+    this.helpAbout.addActionListener(this);
+    this.menu.add(this.helpMenu);
 
   }
 
@@ -511,6 +527,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
     // this.receiversMenu.removeAll();
     this.sourceReceiverMenuItems.clear();
     this.sourceReceiversMenu.removeAll();
+    this.sourceReceiversMenu.add(this.sourceReceiverSelectAll);
+    this.sourceReceiversMenu.add(this.sourceReceiverClearAll);
 
     List<String> receivers = this.cache.getReceiverIds();
     Collections.sort(receivers);
@@ -539,9 +557,12 @@ public class SimpleFrame extends JFrame implements ActionListener,
     }
     this.transmitterFiduciaryItems.clear();
     this.transmittersFiduciaryMenu.removeAll();
+    
 
     this.sourceTransmitterMenuItems.clear();
     this.sourceTransmittersMenu.removeAll();
+    this.sourceTransmittersMenu.add(this.sourceTransmitterSelectAll);
+    this.sourceTransmittersMenu.add(this.sourceTransmitterClearAll);
 
     // Fiduciary transmitters
     List<String> transmitters = this.cache.getFiduciaryTransmitterIds();
@@ -993,6 +1014,32 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.add(heatMap, BorderLayout.CENTER);
       this.validate();
     }
+    else if (e.getSource() == this.visualizeRssiStDvLines) {
+      if (this.mainPanel != null) {
+        this.remove(this.mainPanel);
+      }
+      RssiStDvLineChart newChart = new RssiStDvLineChart(this.cache);
+      this.configureGfx(newChart);
+      this.mainPanel = newChart;
+      this.displayPanel = newChart;
+      this.displayPanel.setMinValue(-100f);
+      this.displayPanel.setMaxValue(0f);
+      this.displayPanel.setSelfAdjustMax(false);
+      this.displayPanel.setSelfAdjustMin(false);
+      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
+      this.displayPanel.setTimeOffset(this.currentTimeOffset);
+      this.displayPanel.setDisplayedId(this.currentDeviceId);
+      this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
+      this.displayPanel.setMaxAge(this.displayedHistory);
+      this.displayPanel.setDisplayLegend(true);
+      this.titleChartType = "RSSI + StdDev Lines";
+      this.panelTitle = (this.isTransmitter ? "Transmitter " : "Receiver ")
+          + this.titleDeviceName + " - " + this.titleChartType;
+      this.setTitle();
+      this.add(newChart, BorderLayout.CENTER);
+      this.validate();
+
+    }
 
     else if (e.getSource() instanceof JRadioButtonMenuItem) {
       boolean found = false;
@@ -1142,6 +1189,10 @@ public class SimpleFrame extends JFrame implements ActionListener,
         item.setSelected(true);
         this.cache.addAllowedDevice(this.sourceTransmitterMenuItems.get(item));
       }
+    }else if(e.getSource() == this.helpAbout){
+      JEditorPane htmlPane = new JEditorPane("text/html", SignalVisualizer.ABOUT_HTML);
+      htmlPane.setEditable(false);
+      JOptionPane.showMessageDialog(this, htmlPane, "About " + SignalVisualizer.TITLE, JOptionPane.INFORMATION_MESSAGE);
     }
   }
 

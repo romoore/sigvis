@@ -48,6 +48,17 @@ import org.slf4j.LoggerFactory;
 
 public class SignalVisualizer {
 
+  
+public static final String TITLE = "SigVis";
+  
+  public static final String VERSION = "1.0.0-BETA";
+  public static final String ABOUT_HTML = "<h2 style=\"text-align: center;\">"+TITLE+" version " + VERSION + "</h2><p>Signal Visualization tools for the Make Sense Platform.</p>" +
+      "<p style=\"font: smaller;\">Copyright &copy; 2012 Robert Moore and Rutgers University<br />"
+      + "SigVis comes with ABSOLUTELY NO WARRANTY.<br />"
+      + "This is free software, and you are welcome to redistribute it<br />"
+      + "under certain conditions; see the included file LICENSE for details.</p>";
+  
+  
   public static final Logger log = LoggerFactory
       .getLogger(SignalVisualizer.class);
 

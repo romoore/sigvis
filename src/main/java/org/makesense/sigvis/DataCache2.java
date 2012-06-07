@@ -652,7 +652,7 @@ public class DataCache2 implements Cloneable {
       if (someItem.getCreationTime() < desiredOrJustAfter - window) {
         continue;
       }
-      if (someItem.getCreationTime() >= desiredOrJustAfter) {
+      if (someItem.getCreationTime() > desiredOrJustAfter) {
         break;
       }
 
