@@ -7,6 +7,7 @@ import java.awt.Polygon;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Stack;
 
 import org.makesense.sigvis.DataCache2;
@@ -57,7 +58,7 @@ public class RssiStDvLineChart extends LineChart {
     float itemXLocation = this.margins[MARGIN_LEFT];
     float previousXLocation = -1;
     float previousYLocation = -1;
-    float previousVariance = 0f;
+
     ChartItem<Float> previousItem = null;
     Graphics2D g2 = (Graphics2D) g;
 
@@ -71,8 +72,8 @@ public class RssiStDvLineChart extends LineChart {
     Stack<Integer> revXValues = new Stack<Integer>();
     Stack<Integer> revYValues = new Stack<Integer>();
 
-    boolean isFirst = true;
-
+    // boolean isFirst = true;
+    boolean previousGap = true;
     float maxValue = this.minValue;
 
     long currentTime = this.lastRepaint;
@@ -112,59 +113,77 @@ public class RssiStDvLineChart extends LineChart {
           - (youngestItem - item.getCreationTime()) * timeScale;
       float itemYLocation = (baseYLevel - (value - this.minValue) * valueScale);
 
+      // First check to see if we should "close" an existing polygon
+      // 1. A gap in the data means shut-down the polygon back at the previous location
       long gap = item.getCreationTime() - lastItemTime;
-      if (gap > MAX_TIME_GAP || variance < 0.01f) {
-        isFirst = true;
-        // If we have a previous polygon, finish it off...
+      if (gap > MAX_TIME_GAP) {
+
+        // POLY: If we have a previous polygon, finish it off... (end "]")
+        if (xValues.size() > 0) {
+          xValues.add(Integer.valueOf((int) previousXLocation));
+          yValues.add(Integer.valueOf((int) previousYLocation));
+          Polygon poly = this.finishAndBuildPoly(xValues, yValues, revXValues,
+              revYValues);
+          fillPolys.add(poly);
+        }
+        // POLY: Don't keep old data around after a gap
+        xValues.clear();
+        yValues.clear();
+        revXValues.clear();
+        revYValues.clear();
+        
+        // LINE&POLY: Don't use old location data after a gap (includes lines)
+        previousXLocation = -1;
+        previousYLocation = -1;
+      }
+      // When variance goes to 0, finish-off any polygons
+      else if(variance < 0.01f){
+     // POLY: If we have a previous polygon, finish it off... (end ">")
         if (xValues.size() > 0) {
           xValues.add(Integer.valueOf((int) itemXLocation));
           yValues.add(Integer.valueOf((int) itemYLocation));
-
-          while (!revXValues.isEmpty()) {
-            xValues.add(revXValues.pop());
-            yValues.add(revYValues.pop());
-          }
-
-          fillPolys.add(this.buildPoly(xValues, yValues));
+          Polygon poly = this.finishAndBuildPoly(xValues, yValues, revXValues,
+              revYValues);
+          fillPolys.add(poly);
         }
+        
+        //POLY: Don't keep old data around once we get to 0
         xValues.clear();
         yValues.clear();
-        if (gap > MAX_TIME_GAP) {
-
-          previousXLocation = -1;
-          previousYLocation = -1;
-          previousVariance = 0f;
-        }
+        revXValues.clear();
+        revYValues.clear();
       }
-      lastItemTime = item.getCreationTime();
 
+      // POLY: We drawing polygons and we have a non-zero variance.
+      // POLY: We should either start or continue a polygon 
       if (this.useTransparency && variance > 0.01f) {
-        if (isFirst) {
-
-          isFirst = false;
-          if (previousXLocation >= 0) {
-            
-            xValues.add(Integer.valueOf((int) previousXLocation));
-            yValues.add(Integer.valueOf((int) previousYLocation));
-          } else {
-            
-            xValues.add(Integer.valueOf((int) itemXLocation));
-            yValues.add(Integer.valueOf((int) itemYLocation));
+        // POLY: New polygon
+        if(xValues.isEmpty()){
+          // We can use the previous value ("<" start)
+          if(previousXLocation > 0){
+            xValues.add(Integer.valueOf((int)previousXLocation));
+            yValues.add(Integer.valueOf((int)previousYLocation));
           }
-        } 
-          xValues.add(Integer.valueOf((int) itemXLocation));
-          yValues.add(Integer.valueOf((int) (itemYLocation + variance
-              * valueScale)));
-
-          revXValues.push(Integer.valueOf((int) itemXLocation));
-          revYValues.push(Integer.valueOf((int) (itemYLocation - variance
-              * valueScale)));
-
+          // Most likely a gap before this, no previous value ("[" start)
+          else{
+            xValues.add(Integer.valueOf((int)itemXLocation));
+            yValues.add(Integer.valueOf((int)itemYLocation));
+          }
+        }
         
+        // POLY: New or continuation
+        // Add the +/- variance values to the polygon
+        xValues.add(Integer.valueOf((int) itemXLocation));
+        yValues.add(Integer.valueOf((int) (itemYLocation + variance
+            * valueScale)));
+
+        revXValues.push(Integer.valueOf((int) itemXLocation));
+        revYValues.push(Integer.valueOf((int) (itemYLocation - variance
+            * valueScale)));
 
       }
 
-      // Draw a line from the previous point
+      // LINE: Draw a line from the previous point
       if (previousXLocation >= 0) {
 
         itemPath.lineTo(itemXLocation, itemYLocation);
@@ -176,7 +195,7 @@ public class RssiStDvLineChart extends LineChart {
       // Prepare for next iteration
       previousXLocation = itemXLocation;
       previousYLocation = itemYLocation;
-      previousVariance = variance;
+      lastItemTime = item.getCreationTime();
 
       previousItem = item;
 
@@ -186,16 +205,13 @@ public class RssiStDvLineChart extends LineChart {
 
     if (this.useTransparency && fillPolys.size() > 0) {
 
+      // POLY: We've reached the end of the data, and haven't closed the poly (end with "]")
       if (xValues.size() > 0) {
         xValues.add(Integer.valueOf((int) previousXLocation));
         yValues.add(Integer.valueOf((int) previousYLocation));
 
-        while (!revXValues.isEmpty()) {
-          xValues.add(revXValues.pop());
-          yValues.add(revYValues.pop());
-        }
-
-        fillPolys.add(this.buildPoly(xValues, yValues));
+        fillPolys.add(this.finishAndBuildPoly(xValues, yValues, revXValues,
+            revYValues));
       }
 
       for (Polygon p : fillPolys) {
@@ -217,8 +233,18 @@ public class RssiStDvLineChart extends LineChart {
     return maxValue;
   }
 
-  private Polygon buildPoly(ArrayList<Integer> xValues,
-      ArrayList<Integer> yValues) {
+  private Polygon finishAndBuildPoly(List<Integer> xValues,
+      List<Integer> yValues, Stack<Integer> xRev, Stack<Integer> yRev) {
+
+    while (!xRev.isEmpty()) {
+      xValues.add(xRev.pop());
+      yValues.add(yRev.pop());
+    }
+
+    return this.buildPoly(xValues, yValues);
+  }
+
+  private Polygon buildPoly(List<Integer> xValues, List<Integer> yValues) {
     Integer[] xIntegers = xValues.toArray(new Integer[] {});
     Integer[] yIntegers = yValues.toArray(new Integer[] {});
 
