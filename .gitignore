@@ -1,6 +1,7 @@
 # Directories
 bin
 target
+logs
 
 # File types
 *.class
