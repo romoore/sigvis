@@ -1,6 +1,6 @@
 /*
- * GRAIL Real Time Localization System
- * Copyright (C) 2011 Rutgers University and Robert Moore
+ * Signal Visualization Tools for Make Sense Platform
+ * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 package org.makesense.sigvis.panels;
 
 import java.awt.AlphaComposite;

@@ -1,3 +1,21 @@
+/*
+ * Signal Visualization Tools for Make Sense Platform
+ * Copyright (C) 2012 Robert Moore
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *  
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 package org.makesense.sigvis;
 
 import java.awt.geom.Point2D;
@@ -39,11 +57,19 @@ public class ConnectionHandler {
   private int clientPort;
   private String region;
 
+  /**
+   * Creates a new connection handler without a cache or connection properties.  If you need to connect
+   * to a world model server, be sure to set a cache first.
+   */
   public ConnectionHandler() {
     super();
 
   }
 
+  /**
+   * Sets the cache for this connection handler.  This method MUST be called before any connections are started.
+   * @param cache the new cache for this connection handler.
+   */
   public void setCache(final DataCache2 cache) {
     this.cache = cache;
   }
@@ -53,6 +79,17 @@ public class ConnectionHandler {
 
   }
 
+  /**
+   * Sets the world model connection details for the client connection. The
+   * region should also be set before a connection attempt is made to the world
+   * model.
+   * 
+   * @param host
+   *          the hostname or IP address of the world model server.
+   * @param port
+   *          the TCP port on which the world model server is listening for
+   *          incoming client connections.
+   */
   public void setClientConnection(String host, int port) {
     if (this.wmc != null) {
       this.disconnectAsClient();
@@ -67,6 +104,14 @@ public class ConnectionHandler {
 
   }
 
+  /**
+   * Attempts to connect to the configured World Model as a client in order to
+   * stream data into the cache. If the cache is null, or the connection fails
+   * for any reason, then {@code false} is returned.
+   * 
+   * @return {@code true} if the connection succeeds, or {@code false} if there
+   *         are any errors.
+   */
   public boolean connectAsClient() {
     if (this.cache == null) {
       log.error("No cache set.  Unable to connect.");
@@ -87,10 +132,19 @@ public class ConnectionHandler {
       log.error("Unable to connect. See log for details.");
       return false;
     }
+    this.cache.setClone(false);
     log.info("Connecting to {}", this.wmc);
-    this.getStarted();
+
     log.info("Connected to {}", this.wmc);
     return true;
+  }
+
+  /**
+   * Should be called after connections are ready in order to start streaming
+   * data into the cache.
+   */
+  public void startup() {
+    this.getStarted();
   }
 
   public void disconnectAsClient() {

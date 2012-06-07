@@ -1,6 +1,6 @@
 /*
- * GRAIL Real Time Localization System
- * Copyright (C) 2012 Rutgers University and Robert Moore
+ * Signal Visualization Tools for Make Sense Platform
+ * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -245,7 +245,6 @@ public class DataCache2 implements Cloneable {
   public void removeListener(final DataCache2Listener listener) {
     this.listeners.remove(listener);
     if (this.listeners.isEmpty() && !this.isClone) {
-      this.shutdown();
       this.disableStreaming();
 
     }
@@ -799,7 +798,7 @@ public class DataCache2 implements Cloneable {
 
   protected void overlay(final DataCache2 clone) {
     clone.clearAll();
-    clone.taskTimer.cancel();
+//    clone.taskTimer.cancel();
 
     int cloneNumRssi = 0, cloneNumVar = 0;
 
@@ -944,6 +943,7 @@ public class DataCache2 implements Cloneable {
   }
 
   protected void updateStats() {
+    log.debug("Updating statistics.");
     this.statsPanel.setNumRxers(this.numRxers);
     this.statsPanel.setNumFidTxers(this.numFidTxers);
     this.statsPanel.setNumRssiPoints(this.numRssiPoints);
@@ -1350,5 +1350,9 @@ public class DataCache2 implements Cloneable {
 
   public ConnectionHandler getHandler() {
     return handler;
+  }
+
+  public void setClone(boolean isClone) {
+    this.isClone = isClone;
   }
 }

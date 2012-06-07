@@ -1,6 +1,6 @@
 /*
- * GRAIL Real Time Localization System
- * Copyright (C) 2011 Rutgers University and Robert Moore
+ * Signal Visualization Tools for Make Sense Platform
+ * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +62,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.mina.util.ConcurrentHashSet;
 import org.makesense.sigvis.DataCache2.ValueType;
 import org.makesense.sigvis.panels.BarChart;
 import org.makesense.sigvis.panels.DisplayPanel;
@@ -104,8 +107,11 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   private final ConnectionOptionsPanel connectionPanel = new ConnectionOptionsPanel();
 
+  private static final Set<SimpleFrame> allFrames = new ConcurrentHashSet<SimpleFrame>();
+
   public SimpleFrame(String initialTitle, FilteringDataCache cache) {
     super();
+    allFrames.add(this);
     this.initialTitle = initialTitle;
 
     this.cache = cache;
@@ -203,14 +209,18 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   protected JMenuItem openConnection = new JMenuItem("Connect...");
 
+  protected JMenuItem closeWindow = new JMenuItem("Close Window");
+
+  protected JMenuItem quitApp = new JMenuItem("Quit " + SignalVisualizer.TITLE);
+
   protected JMenu graphicsMenu = new JMenu("Graphics");
 
   protected JMenu visualizationMenu = new JMenu("Visualizations");
 
-  protected JMenu dataMenu = new JMenu("Data");
-  
+  protected JMenu dataMenu = new JMenu("Cache");
+
   protected JMenu helpMenu = new JMenu("Help");
-  
+
   protected JMenuItem helpAbout = new JMenuItem("About...");
 
   protected JMenuItem clearCache = new JMenuItem("Clear Cache");
@@ -239,8 +249,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   protected JRadioButtonMenuItem visualizeVarianceLines = new JRadioButtonMenuItem(
       "Var. Lines");
-  
-  protected JRadioButtonMenuItem visualizeRssiStDvLines = new JRadioButtonMenuItem("RSSI+Var. Lines");
+
+  protected JRadioButtonMenuItem visualizeRssiStDvLines = new JRadioButtonMenuItem(
+      "RSSI+Var. Lines");
 
   protected JRadioButtonMenuItem visualizeSignalRings = new JRadioButtonMenuItem(
       "RSSI Rings");
@@ -326,16 +337,30 @@ public class SimpleFrame extends JFrame implements ActionListener,
     int acceleratorMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     this.windowNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
         acceleratorMask));
-
-    // this.windowMenu.add(this.windowNew);
+    this.saveCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+        acceleratorMask));
+    this.loadCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+        acceleratorMask));
+    this.closeWindow.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+        acceleratorMask));
+    this.quitApp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+        acceleratorMask));
 
     this.fileMenu.add(this.windowNew);
     this.fileMenu.add(this.openConnection);
     this.fileMenu.add(this.loadCache);
     this.fileMenu.add(this.saveCache);
 
+    this.fileMenu.add(new JSeparator(JSeparator.HORIZONTAL));
+    this.fileMenu.add(this.closeWindow);
+    this.fileMenu.add(this.quitApp);
+
     this.windowNew.addActionListener(this);
     this.openConnection.addActionListener(this);
+    this.saveCache.addActionListener(this);
+    this.loadCache.addActionListener(this);
+    this.closeWindow.addActionListener(this);
+    this.quitApp.addActionListener(this);
 
     this.menu.add(this.fileMenu);
 
@@ -412,7 +437,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationMenu.add(this.visualizeVarianceStripes);
     this.visualizationMenu.add(this.visualizeRssiLineMap);
     this.visualizationMenu.add(this.visualizeVarLineMap);
-    
 
     // TODO: Pretty sure this isn't a useful plot, but no sense in removing it
     // entirely.
@@ -421,7 +445,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationMenu.add(this.visualizeMaxRssiMap);
     this.visualizationMenu.add(this.visualizeMaxVarianceMap);
     this.visualizationMenu.add(visualizeRssiStDvLines);
-    
+
     this.visualizeRssiBars.addActionListener(this);
     this.visualizeVarianceBars.addActionListener(this);
     this.visualizeRssiVoronoi.addActionListener(this);
@@ -469,6 +493,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
         KeyEvent.VK_8, acceleratorMask));
     this.visualizeMaxVarianceMap.setAccelerator(KeyStroke.getKeyStroke(
         KeyEvent.VK_8, acceleratorMask | InputEvent.SHIFT_DOWN_MASK));
+    this.visualizeRssiStDvLines.setAccelerator(KeyStroke.getKeyStroke(
+        KeyEvent.VK_9, acceleratorMask));
 
     this.visualizationGroup.add(this.visualizeRssiBars);
     this.visualizationGroup.add(this.visualizeVarianceBars);
@@ -492,13 +518,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.clearCache.addActionListener(this);
     this.cloneCache.addActionListener(this);
     this.statsCache.addActionListener(this);
-    this.saveCache.addActionListener(this);
-    this.loadCache.addActionListener(this);
-
-    this.saveCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-        acceleratorMask));
-    this.loadCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
-        acceleratorMask));
 
     this.dataMenu.add(this.statsCache);
     this.dataMenu.add(this.cloneCache);
@@ -509,7 +528,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.dataMenu.add(this.clearCache);
 
     this.menu.add(this.dataMenu);
-    
+
     this.helpMenu.add(this.helpAbout);
     this.helpAbout.addActionListener(this);
     this.menu.add(this.helpMenu);
@@ -557,7 +576,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
     }
     this.transmitterFiduciaryItems.clear();
     this.transmittersFiduciaryMenu.removeAll();
-    
 
     this.sourceTransmitterMenuItems.clear();
     this.sourceTransmittersMenu.removeAll();
@@ -1013,8 +1031,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.setTitle();
       this.add(heatMap, BorderLayout.CENTER);
       this.validate();
-    }
-    else if (e.getSource() == this.visualizeRssiStDvLines) {
+    } else if (e.getSource() == this.visualizeRssiStDvLines) {
       if (this.mainPanel != null) {
         this.remove(this.mainPanel);
       }
@@ -1189,15 +1206,47 @@ public class SimpleFrame extends JFrame implements ActionListener,
         item.setSelected(true);
         this.cache.addAllowedDevice(this.sourceTransmitterMenuItems.get(item));
       }
-    }else if(e.getSource() == this.helpAbout){
-      JEditorPane htmlPane = new JEditorPane("text/html", SignalVisualizer.ABOUT_HTML);
+    } else if (e.getSource() == this.helpAbout) {
+      JEditorPane htmlPane = new JEditorPane("text/html",
+          SignalVisualizer.ABOUT_HTML);
       htmlPane.setEditable(false);
-      JOptionPane.showMessageDialog(this, htmlPane, "About " + SignalVisualizer.TITLE, JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(this, htmlPane, "About "
+          + SignalVisualizer.TITLE, JOptionPane.INFORMATION_MESSAGE);
+    } else if (e.getSource() == this.closeWindow) {
+      this.close();
+    } else if (e.getSource() == this.quitApp) {
+      this.quit();
     }
   }
 
+  private void close() {
+    this.cache.removeListener(this);
+    this.setVisible(false);
+    this.dispose();
+  }
+
+  private void quit() {
+    if (this.isVisible()) {
+      int response = JOptionPane.showConfirmDialog(this,
+          "Are you sure you want to quit?", "Exit "+SignalVisualizer.TITLE, JOptionPane.OK_CANCEL_OPTION);
+      if (response != JOptionPane.OK_OPTION) {
+        return;
+      }
+    }
+
+    this.cache.shutdown();
+    this.connHandler.disconnectAsClient();
+
+    for (Iterator<SimpleFrame> iter = allFrames.iterator(); iter.hasNext();) {
+      SimpleFrame frame = iter.next();
+      frame.close();
+    }
+
+    System.exit(0);
+  }
+
   protected void openConnection() {
-    
+
     String host = this.connHandler.getClientHost(), region = this.connHandler
         .getRegion();
     int port = this.connHandler.getClientPort();
@@ -1254,9 +1303,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
         continue;
       }
       try {
-      this.connHandler.disconnectAsClient();
-      }catch(Exception e){
-        log.error("Exception while disconnecting from world model.",e);
+        this.connHandler.disconnectAsClient();
+      } catch (Exception e) {
+        log.error("Exception while disconnecting from world model.", e);
       }
       this.connHandler.setClientConnection(host, port);
       this.connHandler.setRegion(region);
@@ -1264,6 +1313,14 @@ public class SimpleFrame extends JFrame implements ActionListener,
       badInput = !this.connHandler.connectAsClient();
     } while (badInput || host == null || region == null || port <= 0);
 
+//    this.openConnection.setEnabled(false);
+    Thread startStreamThread = new Thread(){
+      public void run(){
+      SimpleFrame.this.connHandler.startup();
+      // Re-enable connections once we've got all the data we need
+//      SimpleFrame.this.openConnection.setEnabled(true);
+      }
+    };
   }
 
   protected void closeConnection() {
@@ -1377,13 +1434,16 @@ public class SimpleFrame extends JFrame implements ActionListener,
   @Override
   public void windowClosed(WindowEvent e) {
     --SimpleFrame.numWindows;
+    this.allFrames.remove(this);
     this.cache.removeListener(this);
-
-    this.cache.shutdown();
+    if (this.cache.getNumListeners() == 0) {
+      this.cache.shutdown();
+      this.cache.clearAll();
+    }
 
     if (SimpleFrame.numWindows <= 0) {
       log.warn("Forcing exit.");
-      System.exit(0);
+      this.quit();
     }
   }
 

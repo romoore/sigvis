@@ -1,6 +1,6 @@
 /*
- * GRAIL Real Time Localization System
- * Copyright (C) 2012 Rutgers University and Robert Moore
+ * Signal Visualization Tools for Make Sense Platform
+ * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
