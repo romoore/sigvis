@@ -58,8 +58,9 @@ public class ConnectionHandler {
   private String region;
 
   /**
-   * Creates a new connection handler without a cache or connection properties.  If you need to connect
-   * to a world model server, be sure to set a cache first.
+   * Creates a new connection handler without a cache or connection properties.
+   * If you need to connect to a world model server, be sure to set a cache
+   * first.
    */
   public ConnectionHandler() {
     super();
@@ -67,8 +68,11 @@ public class ConnectionHandler {
   }
 
   /**
-   * Sets the cache for this connection handler.  This method MUST be called before any connections are started.
-   * @param cache the new cache for this connection handler.
+   * Sets the cache for this connection handler. This method MUST be called
+   * before any connections are started.
+   * 
+   * @param cache
+   *          the new cache for this connection handler.
    */
   public void setCache(final DataCache2 cache) {
     this.cache = cache;
@@ -127,13 +131,12 @@ public class ConnectionHandler {
       log.error("No region specified. Can't connect.");
       return false;
     }
-
+    log.info("Connecting to {}", this.wmc);
     if (!this.wmc.connect()) {
       log.error("Unable to connect. See log for details.");
       return false;
     }
     this.cache.setClone(false);
-    log.info("Connecting to {}", this.wmc);
 
     log.info("Connected to {}", this.wmc);
     return true;
@@ -144,7 +147,14 @@ public class ConnectionHandler {
    * data into the cache.
    */
   public void startup() {
-    this.getStarted();
+    Thread startStreamThread = new Thread() {
+      public void run() {
+        log.info("Starting request threads.");
+        ConnectionHandler.this.getStarted();
+        log.info("Request threads started.");
+      }
+    };
+    startStreamThread.start();
   }
 
   public void disconnectAsClient() {

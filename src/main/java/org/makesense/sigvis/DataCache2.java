@@ -943,7 +943,7 @@ public class DataCache2 implements Cloneable {
   }
 
   protected void updateStats() {
-    log.debug("Updating statistics.");
+//    log.debug("Updating statistics.");
     this.statsPanel.setNumRxers(this.numRxers);
     this.statsPanel.setNumFidTxers(this.numFidTxers);
     this.statsPanel.setNumRssiPoints(this.numRssiPoints);

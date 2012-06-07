@@ -58,11 +58,21 @@ public static final String TITLE = "SigVis";
       + "This is free software, and you are welcome to redistribute it<br />"
       + "under certain conditions; see the included file LICENSE for details.</p>";
   
+  public static final String ABOUT_TXT = TITLE+" version " + VERSION + "\n"
+      + "Signal Visualization tools for the Make Sense Platform.\n\n" 
+      + "Copyright (C) 2012 Robert Moore and Rutgers University\n"
+      + "SigVis comes with ABSOLUTELY NO WARRANTY.\n"
+      + "This is free software, and you are welcome to redistribute it\n"
+      + "under certain conditions; see the included file LICENSE for details.\n";
+  
   
   public static final Logger log = LoggerFactory
       .getLogger(SignalVisualizer.class);
 
   public static void main(String[] args) {
+    
+    System.out.println(ABOUT_TXT);
+    log.info(ABOUT_TXT);
 
     if (args.length == 3) {
 
@@ -94,5 +104,6 @@ public static final String TITLE = "SigVis";
     if(wmHost != null && !handler.connectAsClient()){
       log.error("Connection failed.");
     }
+    handler.startup();
   }
 }

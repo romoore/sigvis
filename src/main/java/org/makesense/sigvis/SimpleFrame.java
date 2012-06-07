@@ -1313,14 +1313,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       badInput = !this.connHandler.connectAsClient();
     } while (badInput || host == null || region == null || port <= 0);
 
-//    this.openConnection.setEnabled(false);
-    Thread startStreamThread = new Thread(){
-      public void run(){
-      SimpleFrame.this.connHandler.startup();
-      // Re-enable connections once we've got all the data we need
-//      SimpleFrame.this.openConnection.setEnabled(true);
-      }
-    };
+    this.connHandler.startup();
   }
 
   protected void closeConnection() {
