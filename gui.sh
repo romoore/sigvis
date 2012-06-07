@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Location of jar file for WM Browser
+#Location of jar file for SigVis
 JAR_FILE="target/sigvis-1.0.0-SNAPSHOT-jar-with-dependencies.jar"
 LAUNCH_CLASS="org.makesense.sigvis.SignalVisualizer"
 
