@@ -37,8 +37,6 @@ public interface DisplayPanel {
 	
 	public void setMaxValue(float maxValue);
 	
-	public void setMinFps(float minFps);
-	
 	public void setSelfAdjustMin(boolean selfAdjustMin);
 	
 	public void setSelfAdjustMax(boolean selfAdjustMax);

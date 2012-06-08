@@ -57,12 +57,6 @@ public class SignalLineMap extends JComponent implements DisplayPanel {
 
   protected long lastRepaint = System.currentTimeMillis();
 
-  protected float minFps = 15;
-
-  protected float currFps = 30;
-
-  protected int slowFrames = 0;
-
   protected float minValue = 0f;
 
   protected float maxValue = 10f;
@@ -195,11 +189,6 @@ public class SignalLineMap extends JComponent implements DisplayPanel {
 
     g2.setColor(origColor);
 
-    long renderTime = System.currentTimeMillis() - this.lastRepaint;
-    this.currFps = this.currFps * 0.875f + (1000f / renderTime) * 0.125f;
-
-    log.debug("Rendered in {}ms.", renderTime);
-
   }
   
   protected void drawTimestamp(final Graphics2D g2, int screenWidth, int screenHeight){
@@ -233,10 +222,6 @@ public class SignalLineMap extends JComponent implements DisplayPanel {
     this.enableAlpha = enableAlpha;
   }
 
-  public void setMinFps(long minFps) {
-    this.minFps = minFps;
-  }
-
   public float getMaxValue() {
     return maxValue;
   }
@@ -260,12 +245,6 @@ public class SignalLineMap extends JComponent implements DisplayPanel {
   @Override
   public void setDeviceIsTransmitter(boolean isTransmitter) {
     // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setMinFps(float minFps) {
-    this.minFps = minFps;
 
   }
 
