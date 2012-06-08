@@ -87,8 +87,7 @@ public class AmbientCloud extends RssiStDvLineChart {
       }
     }
     long timestamp = this.cache.isClone() ? this.cache.getCreationTs()
-        - this.timeOffset : System.currentTimeMillis()
-        - this.timeOffset;
+        - this.timeOffset : System.currentTimeMillis() - this.timeOffset;
     this.drawTimeOfDay(g2, screenWidth, screenHeight, timestamp);
     this.drawTimestamp(g2, screenWidth, screenHeight);
 
@@ -117,32 +116,32 @@ public class AmbientCloud extends RssiStDvLineChart {
       int screenHeight, long timestamp) {
     // 0 - 23
     Calendar currCal = Calendar.getInstance();
-    float hourOfDay = (currCal.get(Calendar.HOUR_OF_DAY)+4)%24;
+    currCal.setTimeInMillis(timestamp);
+    float hourOfDay = (currCal.get(Calendar.HOUR_OF_DAY) + 4) % 24;
     // Add 4 hours, we want to dim when between 8pm and 7am
-//    hourOfDay = (hourOfDay + 4) % 24;
+    // hourOfDay = (hourOfDay + 4) % 24;
 
     // Default to no dimming
     float alpha = 0f;
-    
+
     if (hourOfDay < 11) {
       // Dim from 8pm-10pm, lighten from 5am-7am, dark between
-      
-      if(hourOfDay < 2 || hourOfDay > 9){
-        int minutes = ((int)hourOfDay %2)*60;
+
+      if (hourOfDay < 2 || hourOfDay > 9) {
+        int minutes = ((int) hourOfDay % 2) * 60;
         minutes += currCal.get(Calendar.MINUTE);
-        if(hourOfDay < 2){
-        alpha = (minutes/120f)*.7f;
-        }else{
-          alpha = .7f - (minutes/120f)*.7f;
+        if (hourOfDay < 2) {
+          alpha = (minutes / 120f) * .7f;
+        } else {
+          alpha = .7f - (minutes / 120f) * .7f;
         }
-        
-      }else{
+
+      } else {
         alpha = .7f;
       }
-      
-    
+
     }
-    
+
     if (alpha > 0.001f) {
       Composite origComposite = g2.getComposite();
       Color origColor = g2.getColor();
