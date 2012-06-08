@@ -203,5 +203,5 @@ this.displayedId = "";
     g2.setComposite(origComposite);
     g2.setStroke(origStroke);
   }
-
+  
 }

@@ -39,6 +39,10 @@ public class ImageResources {
   public static BufferedImage IMG_TRANSMITTER = null;
   
   public static BufferedImage IMG_RECEIVER = null;
+  
+  public static BufferedImage IMG_ISLAND = null;
+  
+  public static BufferedImage IMG_KANGAROO_ISLAND = null;
 
   static {
 
@@ -55,6 +59,8 @@ public class ImageResources {
           "/images/receiver.png")));
       IMG_TRANSMITTER = toCompatibleImage(ImageIO.read(ImageResources.class.getResourceAsStream(
           "/images/fiduciary_transmitter.png")));
+      IMG_ISLAND = toCompatibleImage(ImageIO.read(ImageResources.class.getResource("/images/trop_isle.jpg")));
+      IMG_KANGAROO_ISLAND = toCompatibleImage(ImageIO.read(ImageResources.class.getResource("/images/kangaroo_isle.jpg")));
     } catch (Exception e) {
       System.err.println("Unable to load image resources!");
       e.printStackTrace();

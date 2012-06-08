@@ -48,7 +48,6 @@
 	<root>
 		<priority value="debug" />
     	<appender-ref ref="console" />
-    	<appender-ref ref="rollingFile" />
     <!--
     <appender-ref ref="dailyRollingFile" />
 		<appender-ref ref="rollingFile" />

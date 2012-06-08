@@ -64,6 +64,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.mina.util.ConcurrentHashSet;
 import org.makesense.sigvis.DataCache2.ValueType;
+import org.makesense.sigvis.panels.AmbientCloud;
 import org.makesense.sigvis.panels.BarChart;
 import org.makesense.sigvis.panels.DisplayPanel;
 import org.makesense.sigvis.panels.HeatStripes;
@@ -1035,19 +1036,19 @@ public class SimpleFrame extends JFrame implements ActionListener,
       if (this.mainPanel != null) {
         this.remove(this.mainPanel);
       }
-      RssiStDvLineChart newChart = new RssiStDvLineChart(this.cache);
+      RssiStDvLineChart newChart = new AmbientCloud(this.cache);
       this.configureGfx(newChart);
       this.mainPanel = newChart;
       this.displayPanel = newChart;
       this.displayPanel.setMinValue(-100f);
-      this.displayPanel.setMaxValue(0f);
+      this.displayPanel.setMaxValue(-30f);
       this.displayPanel.setSelfAdjustMax(false);
       this.displayPanel.setSelfAdjustMin(false);
       this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
-      this.displayPanel.setMaxAge(this.displayedHistory);
+      this.displayPanel.setMaxAge(30000l);
       this.displayPanel.setDisplayLegend(true);
       this.titleChartType = "RSSI + StdDev Lines";
       this.panelTitle = (this.isTransmitter ? "Transmitter " : "Receiver ")

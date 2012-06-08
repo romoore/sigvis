@@ -261,8 +261,7 @@ public class LineChart extends JComponent implements DisplayPanel,
     Color origColor = g2.getColor();
     Composite origComposite = g2.getComposite();
 
-    g2.setColor(Color.BLACK);
-    g2.fillRect(0, 0, screenWidth, screenHeight);
+    this.drawBackground(g2, screenWidth, screenHeight);
 
     if (this.displayedId == null) {
       return;
@@ -357,6 +356,11 @@ public class LineChart extends JComponent implements DisplayPanel,
       return this.cache.getVarianceList(rxer, txer);
     }
     return null;
+  }
+  
+  protected void drawBackground(Graphics2D g, int screenWidth, int screenHeight){
+    g.setColor(Color.BLACK);
+    g.fillRect(0, 0, screenWidth, screenHeight);
   }
 
   protected void drawAdjustInfo(Graphics g, int screenWidth, int screenHeight) {
@@ -993,7 +997,7 @@ public class LineChart extends JComponent implements DisplayPanel,
 
   @Override
   public boolean supportsTransparency() {
-    return true;// this.type == DataCache2.ValueType.VARIANCE;
+    return this.type == DataCache2.ValueType.VARIANCE;
   }
 
   @Override

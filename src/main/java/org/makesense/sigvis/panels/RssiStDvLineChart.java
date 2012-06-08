@@ -174,7 +174,7 @@ public class RssiStDvLineChart extends LineChart {
 
       // POLY: We drawing polygons and we have a non-zero variance.
       // POLY: We should either start or continue a polygon 
-      if (this.useTransparency && variance > 0.01f) {
+      if (variance > 0.01f) {
         // POLY: New polygon
         if(xValues.isEmpty()){
           // We can use the previous value ("<" start)
@@ -219,9 +219,9 @@ public class RssiStDvLineChart extends LineChart {
 
     }
 
-    g2.draw(itemPath);
+//    g2.draw(itemPath);
 
-    if (this.useTransparency && fillPolys.size() > 0) {
+    if (fillPolys.size() > 0) {
 
       // POLY: We've reached the end of the data, and haven't closed the poly (end with "]")
       if (xValues.size() > 0) {
@@ -234,7 +234,9 @@ public class RssiStDvLineChart extends LineChart {
 
       for (Polygon p : fillPolys) {
         g2.draw(p);
+        if(this.useTransparency){
         g2.setComposite(this.fillUnderAlpha);
+        }
         g2.fill(p);
         g2.setComposite(origComposite);
       }
@@ -283,5 +285,8 @@ public class RssiStDvLineChart extends LineChart {
       String rxer) {
     return this.cache.getRssiList(rxer, txer);
   }
-
+  @Override
+  public boolean supportsTransparency() {
+   return true;
+  }
 }
