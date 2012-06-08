@@ -181,7 +181,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.displayPanel.setMinValue(-100f);
     this.displayPanel.setMaxValue(-40f);
     this.displayPanel.setTimeOffset(this.currentTimeOffset);
-    this.displayPanel.setMaxAge(this.displayedHistory);
+    this.displayPanel.setMaxAge(30000l);
     
     this.titleChartType = "Ambient Variance";
     this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
