@@ -3,16 +3,21 @@ package org.makesense.sigvis.panels;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
@@ -81,7 +86,7 @@ public class AmbientCloud extends RssiStDvLineChart {
       }
     }
 
-    this.drawPauseInfo(g2, screenWidth, screenHeight);
+    this.drawTimestamp(g2, screenWidth, screenHeight);
 
   }
 
@@ -284,7 +289,7 @@ public class AmbientCloud extends RssiStDvLineChart {
 
     // g2.draw(itemPath);
     g2.setColor(Color.WHITE);
- // POLY: We've reached the end of the data, and haven't closed the poly
+    // POLY: We've reached the end of the data, and haven't closed the poly
     // (end with "]")
     if (xValues.size() > 0) {
       xValues.add(Integer.valueOf((int) previousXLocation));
@@ -364,7 +369,6 @@ public class AmbientCloud extends RssiStDvLineChart {
 
       float phi = 0f;
 
-     
       float rise = (float) (rightPoint.getY() - leftPoint.getY());
       float run = (float) (rightPoint.getX() - leftPoint.getX());
 
@@ -384,25 +388,16 @@ public class AmbientCloud extends RssiStDvLineChart {
         float slope = rise / run;
         phi = (float) Math.atan(slope);
 
-        if(i <= poly.npoints/2){
+        if (i <= poly.npoints / 2) {
           phi += Math.PI;
         }
-        
+
         if (i == 0 && slope > 0) {
           System.out.println("First point...");
-          phi += 3*Math.PI / 2;
+          phi += 3 * Math.PI / 2;
         }
 
-        // if(slope > 0){
-        // phi = -phi;
-        // }
-        // Quadrant check
-        // if(i < poly.npoints/2 && slope > 0){
-        // phi = -phi;
-        // }
-
-        // double tan = Math.tan(opposite/adjacent);
-        // phi = (float) (1/tan);
+        
       }
 
       Arc2D arc = new Arc2D.Float(-width / 2, -height / 2, width, height, 0,
@@ -467,6 +462,37 @@ public class AmbientCloud extends RssiStDvLineChart {
   @Override
   protected void drawTimestamp(final Graphics2D g2, int screenWidth,
       int screenHeight) {
+    FontRenderContext frc = g2.getFontRenderContext();
+    Font currentFont = g2.getFont();
+    // Draw current timestamp
+    long timestamp = this.cache.isClone() ? this.cache.getCreationTs() : System
+        .currentTimeMillis();
+    timestamp -= this.timeOffset;
+
+    String dateString = SimpleDateFormat.getDateTimeInstance(
+        SimpleDateFormat.MEDIUM, SimpleDateFormat.MEDIUM).format(
+        new Date(timestamp));
+    Rectangle2D bounds = currentFont.getStringBounds(dateString, frc);
+    Color origColor = g2.getColor();
+    g2.setColor(Color.BLACK);
+    
+    
+    
+    Rectangle2D background = new Rectangle2D.Float(screenWidth
+        - (float) bounds.getWidth() - 9, 5, screenWidth - 5,
+        9 + (float) bounds.getHeight());
+    
+    Composite origComposite = g2.getComposite();
+    if(this.useTransparency){
+      g2.setComposite(this.fillUnderAlpha);
+    }
+    
+    g2.fill(background);
+    g2.setColor(Color.WHITE);
+    g2.drawString(dateString, screenWidth - (float) bounds.getWidth() - 2,
+        (float) bounds.getHeight() + 7);
+    g2.setColor(origColor);
+    g2.setComposite(origComposite);
   }
 
   @Override
