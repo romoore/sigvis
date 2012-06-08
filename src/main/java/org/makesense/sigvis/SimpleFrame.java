@@ -1064,7 +1064,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
-      this.displayPanel.setMaxAge(this.displayedHistory);
+//      this.displayPanel.setMaxAge(this.displayedHistory);
       this.displayPanel.setDisplayLegend(true);
       this.titleChartType = "Ambient Variance";
       this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
@@ -1489,9 +1489,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   public void setDesiredFps(int desiredFps) {
     this.desiredFps = desiredFps;
-    if (this.displayPanel != null) {
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
-    }
 
     if (this.updateTask != null) {
       this.updateTask.cancel();
@@ -1569,6 +1566,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
   }
 
   public void startUpdates() {
+    
+    // TODO: Somewhere! Listener that detects if 5 seconds since last cache update. Display JProgress bar .
     this.updateTask = new TimerTask() {
 
       @Override

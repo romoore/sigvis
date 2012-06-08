@@ -106,6 +106,11 @@ public class HeatStripes extends JComponent implements DisplayPanel,
 
   public void setMaxAge(long maxAge) {
     this.maxAge = maxAge;
+    if (this.timeOffset < 0) {
+      this.timeOffset = 0;
+    } else if (this.timeOffset > (this.cache.getMaxCacheAge() - this.maxAge)) {
+      this.timeOffset = this.cache.getMaxCacheAge() - this.maxAge;
+    }
   }
 
   protected float maxValue = 1f;
