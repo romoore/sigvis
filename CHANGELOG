@@ -1,0 +1,33 @@
+                     Make Sense Signal Visualization Tools
+                                  Change Log
+Version 1.0.0-BETA
+Last updated June 8, 2012
+
+Project Website: <https://github.com/MakeSensePlatform/sigvis>
+
+Copyright (C) 2012 Robert Moore and the Make Sense Project
+
+This application is free software according to the terms and conditions of
+the GNU General Purpose License, version 2.0 (or higher at your discretion).
+You should have received a copy of the GNU General Purpose License v2.0 along
+with this software as the file LICENSE.  If not, you may download a copy from
+<http://www.gnu.org/licenses/gpl-2.0.txt>.
+
+== About ==
+  Make Sense Signal Visualization Tools (SigVis) is a cross-platform graphical
+  desktop application to assist developers and users of the Make Sense
+  Platform/GRAIL Project in visualizing signal data from the system.  It
+  focuses primarily on visualizing RSSI data from wireless transmitters and
+  receivers in the system.
+
+Version 1.0.0 - TBD
+  + Initial version.
+  + Visualizations available:
+    - Bar Charts (RSSI/Variance)
+    - Line Charts (RSS/Variance/Combo)
+    - Voronoi Heat Map (RSSI/Variance) for specific devices or entire regions.
+    - Heat Stripes (RSSI/Variance)
+    - Intersection Map (RSSI/Variance)
+    - Ambient Variance Map (Cloud simulation)
+  + Save and restore cached data to disk.
+  + Multiple windows with shared or separate data caches.
