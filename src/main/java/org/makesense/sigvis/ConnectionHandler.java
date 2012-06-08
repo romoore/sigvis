@@ -21,6 +21,10 @@ package org.makesense.sigvis;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -32,6 +36,7 @@ import java.net.URLConnection;
 import java.util.Collection;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -175,25 +180,62 @@ public class ConnectionHandler {
     private long interval;
     private long lastCheck = System.currentTimeMillis();
     private boolean alreadyShown = false;
-    private ConnectionHandler handler;
-    JProgressBar progress = new JProgressBar();
-    JFrame progressFrame = new JFrame("No Data Received");
+    private final ConnectionHandler handler;
+    private final JProgressBar progress = new JProgressBar();
+    private final JFrame progressFrame = new JFrame("No Data Received");
     private static final String MSG_FMT_STRING = "No data received from World Model for %d seconds.";
-    private JLabel messageLabel = new JLabel(String.format(MSG_FMT_STRING,9999));
+    private final JButton dismissButton = new JButton("Dismiss");
+    private final JLabel messageLabel = new JLabel(String.format(MSG_FMT_STRING,9999));
 
-    public ConnectionChecker(ConnectionHandler handler, long interval) {
+    public ConnectionChecker(final ConnectionHandler handler, final long interval) {
       super();
+      
+      this.progress.setIndeterminate(true);
+      
+      this.dismissButton.addActionListener(new ActionListener() {
+        
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+          ConnectionChecker.this.progressFrame.setVisible(false);
+        }
+      });
+      this.dismissButton.addKeyListener(new KeyListener() {
+        
+        @Override
+        public void keyTyped(KeyEvent arg0) {
+          if(arg0.getKeyChar() == KeyEvent.VK_ENTER){
+            ConnectionChecker.this.progressFrame.setVisible(false);
+          }
+          
+        }
+        
+        @Override
+        public void keyReleased(KeyEvent arg0) {
+          // TODO Auto-generated method stub
+          
+        }
+        
+        @Override
+        public void keyPressed(KeyEvent arg0) {
+          // TODO Auto-generated method stub
+          
+        }
+      });
       
       this.progress.setPreferredSize(new Dimension(320, 10));
       this.progressFrame.getContentPane().setLayout(new BorderLayout());
       this.progressFrame.getContentPane().add(
           this.messageLabel, BorderLayout.NORTH);
+      
       this.progressFrame.getContentPane().add(progress, BorderLayout.CENTER);
+      JPanel panel = new JPanel();
+      panel.add(dismissButton);
+      this.progressFrame.getContentPane().add(panel, BorderLayout.SOUTH);
       this.progressFrame.validate();
       this.progressFrame.pack();
       this.interval = interval;
       this.handler = handler;
-      this.progress.setIndeterminate(true);
+      
 
     }
 
