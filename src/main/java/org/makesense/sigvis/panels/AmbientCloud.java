@@ -16,6 +16,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,7 @@ public class AmbientCloud extends RssiStDvLineChart {
     super(cache);
     this.displayedId = "";
     this.fillUnderAlpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-        .35f);
+        .5f);
     this.margins[MARGIN_TOP] = 0;
     this.margins[MARGIN_BOTTOM] = 0;
     this.margins[MARGIN_LEFT] = 0;
@@ -85,7 +86,10 @@ public class AmbientCloud extends RssiStDvLineChart {
 
       }
     }
-
+    long timestamp = this.cache.isClone() ? this.cache.getCreationTs()
+        - this.timeOffset : System.currentTimeMillis()
+        - this.timeOffset;
+    this.drawTimeOfDay(g2, screenWidth, screenHeight, timestamp);
     this.drawTimestamp(g2, screenWidth, screenHeight);
 
   }
@@ -106,6 +110,48 @@ public class AmbientCloud extends RssiStDvLineChart {
       g2.setColor(Color.BLUE);
       g2.fillRect(0, 0, screenWidth, screenHeight);
 
+    }
+  }
+
+  protected void drawTimeOfDay(Graphics2D g2, int screenWidth,
+      int screenHeight, long timestamp) {
+    // 0 - 23
+    Calendar currCal = Calendar.getInstance();
+    float hourOfDay = (currCal.get(Calendar.HOUR_OF_DAY)+4)%24;
+    // Add 4 hours, we want to dim when between 8pm and 7am
+//    hourOfDay = (hourOfDay + 4) % 24;
+
+    // Default to no dimming
+    float alpha = 0f;
+    
+    if (hourOfDay < 11) {
+      // Dim from 8pm-10pm, lighten from 5am-7am, dark between
+      
+      if(hourOfDay < 2 || hourOfDay > 9){
+        int minutes = ((int)hourOfDay %2)*60;
+        minutes += currCal.get(Calendar.MINUTE);
+        if(hourOfDay < 2){
+        alpha = (minutes/120f)*.7f;
+        }else{
+          alpha = .7f - (minutes/120f)*.7f;
+        }
+        
+      }else{
+        alpha = .7f;
+      }
+      
+    
+    }
+    
+    if (alpha > 0.001f) {
+      Composite origComposite = g2.getComposite();
+      Color origColor = g2.getColor();
+      g2.setColor(Color.BLACK);
+      g2.setComposite(AlphaComposite
+          .getInstance(AlphaComposite.SRC_OVER, alpha));
+      g2.fillRect(0, 0, screenWidth, screenHeight);
+      g2.setColor(origColor);
+      g2.setComposite(origComposite);
     }
   }
 
@@ -397,7 +443,6 @@ public class AmbientCloud extends RssiStDvLineChart {
           phi += 3 * Math.PI / 2;
         }
 
-        
       }
 
       Arc2D arc = new Arc2D.Float(-width / 2, -height / 2, width, height, 0,
@@ -475,18 +520,16 @@ public class AmbientCloud extends RssiStDvLineChart {
     Rectangle2D bounds = currentFont.getStringBounds(dateString, frc);
     Color origColor = g2.getColor();
     g2.setColor(Color.BLACK);
-    
-    
-    
+
     Rectangle2D background = new Rectangle2D.Float(screenWidth
         - (float) bounds.getWidth() - 9, 5, screenWidth - 5,
         9 + (float) bounds.getHeight());
-    
+
     Composite origComposite = g2.getComposite();
-    if(this.useTransparency){
+    if (this.useTransparency) {
       g2.setComposite(this.fillUnderAlpha);
     }
-    
+
     g2.fill(background);
     g2.setColor(Color.WHITE);
     g2.drawString(dateString, screenWidth - (float) bounds.getWidth() - 2,
