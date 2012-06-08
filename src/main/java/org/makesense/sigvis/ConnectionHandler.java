@@ -18,6 +18,9 @@
  */
 package org.makesense.sigvis;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -29,6 +32,10 @@ import java.net.URLConnection;
 import java.util.Collection;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 import org.grailrtls.libworldmodel.client.ClientWorldConnection;
 import org.grailrtls.libworldmodel.client.Response;
@@ -56,6 +63,8 @@ public class ConnectionHandler {
   private String clientHost;
   private int clientPort;
   private String region;
+
+  private boolean shouldConnect = false;
 
   /**
    * Creates a new connection handler without a cache or connection properties.
@@ -137,7 +146,7 @@ public class ConnectionHandler {
       return false;
     }
     this.cache.setClone(false);
-
+    this.shouldConnect = true;
     log.info("Connected to {}", this.wmc);
     return true;
   }
@@ -147,6 +156,7 @@ public class ConnectionHandler {
    * data into the cache.
    */
   public void startup() {
+    this.startConnChecker();
     Thread startStreamThread = new Thread() {
       public void run() {
         log.info("Starting request threads.");
@@ -155,10 +165,88 @@ public class ConnectionHandler {
       }
     };
     startStreamThread.start();
+
+  }
+
+  private ConnectionChecker connCheckThread;
+
+  private static class ConnectionChecker extends Thread {
+    private boolean keepRunning = true;
+    private long interval;
+    private long lastCheck = System.currentTimeMillis();
+    private boolean alreadyShown = false;
+    private ConnectionHandler handler;
+    JProgressBar progress = new JProgressBar();
+    JFrame progressFrame = new JFrame("No Data Received");
+    private static final String MSG_FMT_STRING = "No data received from World Model for %d seconds.";
+    private JLabel messageLabel = new JLabel(String.format(MSG_FMT_STRING,9999));
+
+    public ConnectionChecker(ConnectionHandler handler, long interval) {
+      super();
+      
+      this.progress.setPreferredSize(new Dimension(320, 10));
+      this.progressFrame.getContentPane().setLayout(new BorderLayout());
+      this.progressFrame.getContentPane().add(
+          this.messageLabel, BorderLayout.NORTH);
+      this.progressFrame.getContentPane().add(progress, BorderLayout.CENTER);
+      this.progressFrame.validate();
+      this.progressFrame.pack();
+      this.interval = interval;
+      this.handler = handler;
+      this.progress.setIndeterminate(true);
+
+    }
+
+    @Override
+    public void run() {
+      while (this.keepRunning) {
+        long now = System.currentTimeMillis();
+        if (this.handler.shouldConnect
+            && (now - this.lastCheck > this.interval)) {
+          if (this.handler.cache.lastRssiUpdate < this.lastCheck) {
+            int seconds = (int)(now - this.handler.cache.getLastRssiUpdate())/1000;
+            this.messageLabel.setText(String.format(MSG_FMT_STRING,seconds));
+            if (!this.alreadyShown && !this.progressFrame.isVisible()) {
+              Dimension screenSize = Toolkit.getDefaultToolkit()
+                  .getScreenSize();
+
+              this.progressFrame.setLocation((int)(screenSize.getWidth() / 2
+                  - this.progressFrame.getWidth() / 2), (int)(screenSize.getHeight()
+                  / 2 - this.progressFrame.getHeight() / 2));
+              this.progressFrame.setVisible(true);
+              this.alreadyShown = true;
+            }
+          } else {
+            this.progressFrame.setVisible(false);
+            this.alreadyShown = false;
+            this.lastCheck = now;
+          }
+        }
+        try {
+          Thread.sleep(250);
+        } catch (InterruptedException ie) {
+
+        }
+
+      }
+    }
+
+    public void shutdown() {
+      this.keepRunning = false;
+    }
+  }
+
+  private void startConnChecker() {
+    if (this.connCheckThread != null) {
+      this.connCheckThread.shutdown();
+      this.connCheckThread = null;
+    }
+    this.connCheckThread = new ConnectionChecker(this, 5000);
+    this.connCheckThread.start();
   }
 
   public void disconnectAsClient() {
-
+    this.shouldConnect = false;
     if (this.rssiHandler != null) {
       this.rssiHandler.shutdown();
       try {
