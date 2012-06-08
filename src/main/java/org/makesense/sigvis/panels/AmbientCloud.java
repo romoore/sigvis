@@ -284,17 +284,16 @@ public class AmbientCloud extends RssiStDvLineChart {
 
     // g2.draw(itemPath);
     g2.setColor(Color.WHITE);
+ // POLY: We've reached the end of the data, and haven't closed the poly
+    // (end with "]")
+    if (xValues.size() > 0) {
+      xValues.add(Integer.valueOf((int) previousXLocation));
+      yValues.add(Integer.valueOf((int) previousYLocation));
+
+      fillPolys.add(this.finishAndBuildPoly(xValues, yValues, revXValues,
+          revYValues));
+    }
     if (fillPolys.size() > 0) {
-
-      // POLY: We've reached the end of the data, and haven't closed the poly
-      // (end with "]")
-      if (xValues.size() > 0) {
-        xValues.add(Integer.valueOf((int) previousXLocation));
-        yValues.add(Integer.valueOf((int) previousYLocation));
-
-        fillPolys.add(this.finishAndBuildPoly(xValues, yValues, revXValues,
-            revYValues));
-      }
 
       for (Polygon poly : fillPolys) {
         // g2.draw(p);

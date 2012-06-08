@@ -131,8 +131,11 @@ public class RssiStDvLineChart extends LineChart {
           - (youngestItem - item.getCreationTime()) * timeScale;
       float itemYLocation = (baseYLevel - (value - this.minValue) * valueScale);
 
+      boolean finished = false;
+      
       // First check to see if we should "close" an existing polygon
-      // 1. A gap in the data means shut-down the polygon back at the previous location
+      // 1. A gap in the data means shut-down the polygon back at the previous
+      // location
       long gap = item.getCreationTime() - lastItemTime;
       if (gap > MAX_TIME_GAP) {
 
@@ -143,29 +146,31 @@ public class RssiStDvLineChart extends LineChart {
           Polygon poly = this.finishAndBuildPoly(xValues, yValues, revXValues,
               revYValues);
           fillPolys.add(poly);
+          finished = true;
         }
         // POLY: Don't keep old data around after a gap
         xValues.clear();
         yValues.clear();
         revXValues.clear();
         revYValues.clear();
-        
+
         // LINE&POLY: Don't use old location data after a gap (includes lines)
         previousXLocation = -1;
         previousYLocation = -1;
       }
       // When variance goes to 0, finish-off any polygons
-      else if(variance < 0.01f){
-     // POLY: If we have a previous polygon, finish it off... (end ">")
+      else if (variance < 0.01f) {
+        // POLY: If we have a previous polygon, finish it off... (end ">")
         if (xValues.size() > 0) {
           xValues.add(Integer.valueOf((int) itemXLocation));
           yValues.add(Integer.valueOf((int) itemYLocation));
           Polygon poly = this.finishAndBuildPoly(xValues, yValues, revXValues,
               revYValues);
           fillPolys.add(poly);
+          finished = true;
         }
-        
-        //POLY: Don't keep old data around once we get to 0
+
+        // POLY: Don't keep old data around once we get to 0
         xValues.clear();
         yValues.clear();
         revXValues.clear();
@@ -173,22 +178,22 @@ public class RssiStDvLineChart extends LineChart {
       }
 
       // POLY: We drawing polygons and we have a non-zero variance.
-      // POLY: We should either start or continue a polygon 
+      // POLY: We should either start or continue a polygon
       if (variance > 0.01f) {
         // POLY: New polygon
-        if(xValues.isEmpty()){
+        if (xValues.isEmpty()) {
           // We can use the previous value ("<" start)
-          if(previousXLocation > 0){
-            xValues.add(Integer.valueOf((int)previousXLocation));
-            yValues.add(Integer.valueOf((int)previousYLocation));
+          if (previousXLocation > 0) {
+            xValues.add(Integer.valueOf((int) previousXLocation));
+            yValues.add(Integer.valueOf((int) previousYLocation));
           }
           // Most likely a gap before this, no previous value ("[" start)
-          else{
-            xValues.add(Integer.valueOf((int)itemXLocation));
-            yValues.add(Integer.valueOf((int)itemYLocation));
+          else {
+            xValues.add(Integer.valueOf((int) itemXLocation));
+            yValues.add(Integer.valueOf((int) itemYLocation));
           }
         }
-        
+
         // POLY: New or continuation
         // Add the +/- variance values to the polygon
         xValues.add(Integer.valueOf((int) itemXLocation));
@@ -203,13 +208,16 @@ public class RssiStDvLineChart extends LineChart {
 
       // LINE: Draw a line from the previous point
       if (previousXLocation >= 0) {
-
-        itemPath.lineTo(itemXLocation, itemYLocation);
+        if (xValues.isEmpty() && !finished) {
+          itemPath.lineTo(itemXLocation, itemYLocation);
+        }else{
+          itemPath.moveTo(itemXLocation,itemYLocation);
+        }
 
       } else {
         itemPath.moveTo(itemXLocation, itemYLocation);
       }
-
+      
       // Prepare for next iteration
       previousXLocation = itemXLocation;
       previousYLocation = itemYLocation;
@@ -219,23 +227,24 @@ public class RssiStDvLineChart extends LineChart {
 
     }
 
-//    g2.draw(itemPath);
+    g2.draw(itemPath);
+ // POLY: We've reached the end of the data, and haven't closed the poly
+    // (end with "]")
+    if (xValues.size() > 0) {
+      xValues.add(Integer.valueOf((int) previousXLocation));
+      yValues.add(Integer.valueOf((int) previousYLocation));
 
+      fillPolys.add(this.finishAndBuildPoly(xValues, yValues, revXValues,
+          revYValues));
+    }
     if (fillPolys.size() > 0) {
 
-      // POLY: We've reached the end of the data, and haven't closed the poly (end with "]")
-      if (xValues.size() > 0) {
-        xValues.add(Integer.valueOf((int) previousXLocation));
-        yValues.add(Integer.valueOf((int) previousYLocation));
-
-        fillPolys.add(this.finishAndBuildPoly(xValues, yValues, revXValues,
-            revYValues));
-      }
+      
 
       for (Polygon p : fillPolys) {
         g2.draw(p);
-        if(this.useTransparency){
-        g2.setComposite(this.fillUnderAlpha);
+        if (this.useTransparency) {
+          g2.setComposite(this.fillUnderAlpha);
         }
         g2.fill(p);
         g2.setComposite(origComposite);
@@ -285,8 +294,9 @@ public class RssiStDvLineChart extends LineChart {
       String rxer) {
     return this.cache.getRssiList(rxer, txer);
   }
+
   @Override
   public boolean supportsTransparency() {
-   return true;
+    return true;
   }
 }
