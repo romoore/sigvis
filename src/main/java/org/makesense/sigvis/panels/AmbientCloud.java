@@ -30,7 +30,7 @@ public class AmbientCloud extends RssiStDvLineChart {
     super(cache);
     this.displayedId = "";
     this.fillUnderAlpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-        .25f);
+        .35f);
     this.margins[MARGIN_TOP] = 0;
     this.margins[MARGIN_BOTTOM] = 0;
     this.margins[MARGIN_LEFT] = 0;

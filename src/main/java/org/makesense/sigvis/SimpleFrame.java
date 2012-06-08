@@ -172,6 +172,22 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.buildMenu();
 
     this.setJMenuBar(this.menu);
+    
+    // Default to ambient variance chart
+    AmbientCloud newChart = new AmbientCloud(this.cache);
+    this.configureGfx(newChart);
+    this.mainPanel = newChart;
+    this.displayPanel = newChart;
+    this.displayPanel.setMinValue(-100f);
+    this.displayPanel.setMaxValue(-40f);
+    this.displayPanel.setTimeOffset(this.currentTimeOffset);
+    this.displayPanel.setMaxAge(this.displayedHistory);
+    
+    this.titleChartType = "Ambient Variance";
+    this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+    this.setTitle();
+    this.add(newChart, BorderLayout.CENTER);
+    this.validate();
 
     this.pack();
 
@@ -278,6 +294,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       "Max RSSI Map");
   protected JRadioButtonMenuItem visualizeMaxVarianceMap = new JRadioButtonMenuItem(
       "Max Var. Map");
+  
+  protected JRadioButtonMenuItem visualizeAmbient = new JRadioButtonMenuItem("Ambient Variance");
 
   protected JMenuItem gfxAntiAlias = new JCheckBoxMenuItem("Anti-Alias");
   protected JMenuItem gfxTransparent = new JCheckBoxMenuItem("Transparency");
@@ -445,7 +463,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationMenu.add(this.visualizeVarIntersect);
     this.visualizationMenu.add(this.visualizeMaxRssiMap);
     this.visualizationMenu.add(this.visualizeMaxVarianceMap);
-    this.visualizationMenu.add(visualizeRssiStDvLines);
+    this.visualizationMenu.add(this.visualizeRssiStDvLines);
+    this.visualizationMenu.add(this.visualizeAmbient);
 
     this.visualizeRssiBars.addActionListener(this);
     this.visualizeVarianceBars.addActionListener(this);
@@ -463,6 +482,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizeMaxRssiMap.addActionListener(this);
     this.visualizeMaxVarianceMap.addActionListener(this);
     this.visualizeRssiStDvLines.addActionListener(this);
+    this.visualizeAmbient.addActionListener(this);
+    
 
     this.visualizeRssiBars.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
         acceleratorMask));
@@ -496,6 +517,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
         KeyEvent.VK_8, acceleratorMask | InputEvent.SHIFT_DOWN_MASK));
     this.visualizeRssiStDvLines.setAccelerator(KeyStroke.getKeyStroke(
         KeyEvent.VK_9, acceleratorMask));
+    this.visualizeAmbient.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,acceleratorMask));
 
     this.visualizationGroup.add(this.visualizeRssiBars);
     this.visualizationGroup.add(this.visualizeVarianceBars);
@@ -513,6 +535,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationGroup.add(this.visualizeMaxRssiMap);
     this.visualizationGroup.add(this.visualizeMaxVarianceMap);
     this.visualizationGroup.add(this.visualizeRssiStDvLines);
+    this.visualizationGroup.add(this.visualizeAmbient);
+    
+    this.visualizeAmbient.setSelected(true);
 
     this.menu.add(this.visualizationMenu);
 
@@ -664,7 +689,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
+      
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       newChart.setDisplayedId(this.currentDeviceId);
       newChart.setDeviceIsTransmitter(this.isTransmitter);
@@ -686,7 +711,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(0f);
       this.displayPanel.setMaxValue(50f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       newChart.setDisplayedId(this.currentDeviceId);
       newChart.setDeviceIsTransmitter(this.isTransmitter);
@@ -707,7 +731,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       heatMap.setDisplayedId(this.currentDeviceId);
       heatMap.setDeviceIsTransmitter(this.isTransmitter);
@@ -732,7 +755,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(0f);
       this.displayPanel.setMaxValue(50f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       heatMap.setDisplayedId(this.currentDeviceId);
       heatMap.setDeviceIsTransmitter(this.isTransmitter);
@@ -754,7 +776,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newChart;
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setSelfAdjustMax(false);
       this.displayPanel.setSelfAdjustMin(false);
@@ -781,7 +802,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMaxValue(50f);
       this.displayPanel.setSelfAdjustMax(true);
       this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -804,9 +824,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -832,9 +849,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -843,7 +857,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "RSSI Stripes";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -859,9 +873,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(0f);
       this.displayPanel.setMaxValue(20f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -870,7 +881,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Variance Stripes";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -886,9 +897,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(0f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -897,7 +905,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "RSSI Lines";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle =(this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -913,9 +921,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(1f);
       this.displayPanel.setMaxValue(20f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -924,7 +929,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Variance Lines";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -941,9 +946,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(0f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -952,7 +954,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "RSSI Intersect.";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -969,9 +971,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel = newMap;
       this.displayPanel.setMinValue(1f);
       this.displayPanel.setMaxValue(20f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
@@ -980,7 +979,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Variance Intersect.";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -997,14 +996,13 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       heatMap.setDisplayedId(this.currentDeviceId);
       heatMap.setDeviceIsTransmitter(this.isTransmitter);
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Max RSSI Map";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(heatMap, BorderLayout.CENTER);
       this.validate();
@@ -1021,14 +1019,13 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(0f);
       this.displayPanel.setMaxValue(50f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       heatMap.setDisplayedId(this.currentDeviceId);
       heatMap.setDeviceIsTransmitter(this.isTransmitter);
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Max Variance Map";
-      this.panelTitle = this.cache.getRegionUri() + " - " + this.titleChartType;
+      this.panelTitle =(this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(heatMap, BorderLayout.CENTER);
       this.validate();
@@ -1036,23 +1033,41 @@ public class SimpleFrame extends JFrame implements ActionListener,
       if (this.mainPanel != null) {
         this.remove(this.mainPanel);
       }
-      RssiStDvLineChart newChart = new AmbientCloud(this.cache);
+      RssiStDvLineChart newChart = new RssiStDvLineChart(this.cache);
       this.configureGfx(newChart);
       this.mainPanel = newChart;
       this.displayPanel = newChart;
       this.displayPanel.setMinValue(-100f);
-      this.displayPanel.setMaxValue(-30f);
-      this.displayPanel.setSelfAdjustMax(false);
-      this.displayPanel.setSelfAdjustMin(false);
-      this.displayPanel.setMinFps((float) Math.ceil(this.desiredFps * 0.8f));
+      this.displayPanel.setMaxValue(-20f);
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
-      this.displayPanel.setMaxAge(30000l);
+      this.displayPanel.setMaxAge(this.displayedHistory);
       this.displayPanel.setDisplayLegend(true);
       this.titleChartType = "RSSI + StdDev Lines";
       this.panelTitle = (this.isTransmitter ? "Transmitter " : "Receiver ")
           + this.titleDeviceName + " - " + this.titleChartType;
+      this.setTitle();
+      this.add(newChart, BorderLayout.CENTER);
+      this.validate();
+
+    }else if (e.getSource() == this.visualizeAmbient) {
+      if (this.mainPanel != null) {
+        this.remove(this.mainPanel);
+      }
+      AmbientCloud newChart = new AmbientCloud(this.cache);
+      this.configureGfx(newChart);
+      this.mainPanel = newChart;
+      this.displayPanel = newChart;
+      this.displayPanel.setMinValue(-100f);
+      this.displayPanel.setMaxValue(-40f);
+      this.displayPanel.setTimeOffset(this.currentTimeOffset);
+      this.displayPanel.setDisplayedId(this.currentDeviceId);
+      this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
+      this.displayPanel.setMaxAge(this.displayedHistory);
+      this.displayPanel.setDisplayLegend(true);
+      this.titleChartType = "Ambient Variance";
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newChart, BorderLayout.CENTER);
       this.validate();
