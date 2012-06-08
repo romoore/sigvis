@@ -1,0 +1,79 @@
+                     Make Sense Signal Visualization Tools
+
+Version 1.0.0-BETA
+Last updated June 8, 2012
+
+Project Website: <https://github.com/MakeSensePlatform/sigvis>
+
+This application is free software according to the terms and conditions of
+the GNU General Purpose License, version 2.0 (or higher at your discretion).
+You should have received a copy of the GNU General Purpose License v2.0 along
+with this software as the file LICENSE.  If not, you may download a copy from
+<http://www.gnu.org/licenses/gpl-2.0.txt>.
+
+== About ==
+  Make Sense Signal Visualization Tools (SigVis) is a cross-platform graphical
+  desktop application to assist developers and users of the Make Sense
+  Platform/GRAIL Project in visualizing signal data from the system.  It
+  focuses primarily on visualizing RSSI data from wireless transmitters and
+  receivers in the system.
+
+  SigVis is not aimed at end-users/consumers, and may contain bugs.
+  Documentation is provided via the in-application Help menu.  For additional
+  support or help, please visit the project website at the URL listed above.
+
+== Compiling ==
+  SigVis should be compiled using the Apache Maven project management tool.
+  The project is currently compatible with Apache Maven version 3, which
+  can be downloaded for free at <http://maven.apache.org/>.  To build the
+  static JAR file output, the following command should be run from the
+  project root (where the pom.xml file is located):
+
+    mvn clean install -U
+
+  If everything compiles correctly, then near the end of the Maven output,
+  this line should appear:
+
+    [INFO] BUILD SUCCESS
+
+  In this case, the JAR file will be located in the ``target'' subdirectory.
+  If not, please visit the project website listed at the top of this
+  document for support.
+
+== Running ==
+
+  SigVis can be run from the provided Bash script (gui.sh) or via a direct
+  call to the Java launcher (java or java.exe).
+
+  To run from the script, change to the root directory (where gui.sh is
+  located) and run the following command:
+
+    ./gui.sh
+
+  To run via the Java launcher directly, you only need to include the path to
+  the Jar file:
+
+    java -jar path/to/sigvis-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+
+  SigVis takes an optional set of parameters to connect to a remote MSP/GRAIL
+  World Model server on startup.  To do so, specify the World Model host/IP,
+  client port, and a region name as commandline parameters:
+
+    ./gui.sh grail.mydomain.com 7010 myregion
+
+  or
+
+    java -jar path/to/sigvis-1.0.0-SNAPSHOT-jar-with-dependencies.jar \
+      grail.mydomain.com 7010 myregion
+
+  SigVis can also make use of driver-assisted rendering, which reduces the
+  load on the CPU and allows for higher refresh rates.  To enable 2D
+  acceleration from your graphics card, be sure that the JVM parameter
+  "sun.java2d.opengl=true" is set. This can be done as follows:
+
+    java -Dsun.java2d.opengl=true -jar path/to/sigvis.jar 
+
+  If you are using the provided Bash script, it will attempt to auto-detect
+  accelerated graphics using the "glxinfo" utility.  If glxinfo is not
+  available on your system, you may modify the script to force accelerated
+  graphics.
