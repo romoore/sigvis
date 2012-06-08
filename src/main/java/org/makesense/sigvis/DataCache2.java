@@ -196,9 +196,9 @@ public class DataCache2 implements Cloneable {
   @XStreamOmitField
   protected volatile int numRxers = 0;
   @XStreamOmitField
-  protected long lastRssiUpdate = 0l;
+  protected long lastRssiUpdate = System.currentTimeMillis();
   @XStreamOmitField
-  protected long lastVarianceUpdate = 0l;
+  protected long lastVarianceUpdate = System.currentTimeMillis();
 
   public DataCache2(final ConnectionHandler handler){
     this(handler, System.currentTimeMillis());
