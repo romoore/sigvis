@@ -31,3 +31,4 @@ Version 1.0.0 - TBD
     - Ambient Variance Map (Cloud simulation)
   + Save and restore cached data to disk.
   + Multiple windows with shared or separate data caches.
+  + Linux (Bash) and Windows (Batch) start-up scripts.
