@@ -1,11 +1,11 @@
-                     Make Sense Signal Visualization Tools
+                    Olw Platform Signal Visualization Tools
 
 Version 1.0.0-BETA
 Last updated June 8, 2012
 
-Project Website: <https://github.com/MakeSensePlatform/sigvis>
+Project Website: <https://github.com/OwlPlatform/sigvis>
 
-Copyright (C) 2012 Robert Moore and the Make Sense Project
+Copyright (C) 2012 Robert Moore and the Owl Platform
 
 This application is free software according to the terms and conditions of
 the GNU General Purpose License, version 2.0 (or higher at your discretion).
@@ -14,9 +14,9 @@ with this software as the file LICENSE.  If not, you may download a copy from
 <http://www.gnu.org/licenses/gpl-2.0.txt>.
 
 == About ==
-  Make Sense Signal Visualization Tools (SigVis) is a cross-platform graphical
-  desktop application to assist developers and users of the Make Sense
-  Platform/GRAIL Project in visualizing signal data from the system.  It
+  Owl Platform Signal Visualization Tools (SigVis) is a cross-platform graphical
+  desktop application to assist developers and users of the Owl
+  Platform in visualizing signal data from the system.  It
   focuses primarily on visualizing RSSI data from wireless transmitters and
   receivers in the system.
 
@@ -57,7 +57,7 @@ with this software as the file LICENSE.  If not, you may download a copy from
 
     java -jar path/to/sigvis-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 
-  SigVis takes an optional set of parameters to connect to a remote MSP/GRAIL
+  SigVis takes an optional set of parameters to connect to a remote Owl Platform
   World Model server on startup.  To do so, specify the World Model host/IP,
   client port, and a region name as commandline parameters:
 

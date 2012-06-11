@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.makesense</groupId>
+	<groupId>com.owlplatform</groupId>
 	<artifactId>sigvis</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>MSP Signal Visualization tools</name>
+	<name>Owl Platform Signal Visualization tools</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -125,7 +125,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.makesense.sigvis.SignalVisualizer</mainClass>
+							<mainClass>org.owlplatorm.sigvis.SignalVisualizer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -140,7 +140,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.makesense.sigvis.SignalVisualizer</mainClass>
+							<mainClass>org.owlplatform.sigvis.SignalVisualizer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -218,14 +218,14 @@
 		</dependency>
 	</dependencies>
 
-	<url>https://github.com/MakeSensePlatform/sigvis</url>
+	<url>https://github.com/OwlPlatform/sigvis</url>
 	<organization>
-		<name>Make Sense Platform</name>
-		<url>https://github.com/MakeSensePlatform</url>
+		<name>Owl Platform</name>
+		<url>https://github.com/OwlPlatform</url>
 	</organization>
 	<issueManagement>
 		<system>GitHub Issue Tracker</system>
-		<url>https://github.com/MakeSensePlatform/sigvis/issues</url>
+		<url>https://github.com/OwlPlatform/sigvis/issues</url>
 	</issueManagement>
-	<description>A Java/Swing-based GUI that allows users and developers of MSP/GRAIL to visualize and analyze device signal data in real-time or from saved files.</description>
+	<description>A Java/Swing-based GUI that allows users and developers of the Owl Platform to visualize and analyze device signal data in real-time or from saved files.</description>
 </project>

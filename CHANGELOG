@@ -1,11 +1,11 @@
-                     Make Sense Signal Visualization Tools
+                    Owl Platform Signal Visualization Tools
                                   Change Log
 Version 1.0.0-BETA
 Last updated June 8, 2012
 
-Project Website: <https://github.com/MakeSensePlatform/sigvis>
+Project Website: <https://github.com/OwlPlatform/sigvis>
 
-Copyright (C) 2012 Robert Moore and the Make Sense Project
+Copyright (C) 2012 Robert Moore and the Owl Platform
 
 This application is free software according to the terms and conditions of
 the GNU General Purpose License, version 2.0 (or higher at your discretion).
@@ -14,8 +14,8 @@ with this software as the file LICENSE.  If not, you may download a copy from
 <http://www.gnu.org/licenses/gpl-2.0.txt>.
 
 == About ==
-  Make Sense Signal Visualization Tools (SigVis) is a cross-platform graphical
-  desktop application to assist developers and users of the Make Sense
+  Owl Platform Signal Visualization Tools (SigVis) is a cross-platform
+  graphical desktop application to assist developers and users of the Owl
   Platform/GRAIL Project in visualizing signal data from the system.  It
   focuses primarily on visualizing RSSI data from wireless transmitters and
   receivers in the system.
