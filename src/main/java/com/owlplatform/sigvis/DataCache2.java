@@ -38,11 +38,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -57,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.owlplatform.sigvis.structs.ChartItem;
+import com.owlplatform.sigvis.structs.ChartItemTimeComparator;
 import com.owlplatform.sigvis.structs.SignalToDistanceItem;
 import com.owlplatform.sigvis.structs.SimpleChartItem;
 import com.thoughtworks.xstream.XStream;
@@ -114,16 +118,22 @@ public class DataCache2 implements Cloneable {
   protected String regionUri = null;
 
   /**
-   * Map of Receiver ID -> Transmitter ID -> Queue of Average RSSI values.
+   * Map of Receiver ID -> Transmitter ID -> Set of Average RSSI values.
    */
   @XStreamAlias("averageRssiByRByT")
-  protected final Map<String, Map<String, Deque<ChartItem<Float>>>> averageRssiByRByT = new ConcurrentHashMap<String, Map<String, Deque<ChartItem<Float>>>>();
+  // protected final Map<String, Map<String, Deque<ChartItem<Float>>>>
+  // averageRssiByRByT = new ConcurrentHashMap<String, Map<String,
+  // Deque<ChartItem<Float>>>>();
+  protected final Map<String, Map<String, NavigableSet<ChartItem<Float>>>> averageRssiByRByT = new ConcurrentHashMap<String, Map<String, NavigableSet<ChartItem<Float>>>>();
 
   /**
-   * Map of Receiver ID -> Transmitter ID -> Queue of RSSI variance values.
+   * Map of Receiver ID -> Transmitter ID -> Set of RSSI variance values.
    */
   @XStreamAlias("varianceByRByT")
-  protected final Map<String, Map<String, Deque<ChartItem<Float>>>> varianceRssiByRByT = new ConcurrentHashMap<String, Map<String, Deque<ChartItem<Float>>>>();
+  // protected final Map<String, Map<String, Deque<ChartItem<Float>>>>
+  // varianceRssiByRByT = new ConcurrentHashMap<String, Map<String,
+  // Deque<ChartItem<Float>>>>();
+  protected final Map<String, Map<String, NavigableSet<ChartItem<Float>>>> varianceRssiByRByT = new ConcurrentHashMap<String, Map<String, NavigableSet<ChartItem<Float>>>>();
 
   /**
    * List of objects that care when receivers or fiduciary transmitters become
@@ -200,7 +210,7 @@ public class DataCache2 implements Cloneable {
   @XStreamOmitField
   protected long lastVarianceUpdate = System.currentTimeMillis();
 
-  public DataCache2(final ConnectionHandler handler){
+  public DataCache2(final ConnectionHandler handler) {
     this(handler, System.currentTimeMillis());
   }
 
@@ -210,7 +220,7 @@ public class DataCache2 implements Cloneable {
     } else {
       this.creationTs = System.currentTimeMillis();
     }
-    this.handler =handler;
+    this.handler = handler;
     this.handler.setCache(this);
     this.taskTimer.schedule(new TimerTask() {
 
@@ -284,31 +294,32 @@ public class DataCache2 implements Cloneable {
       return;
     }
 
-    Map<String, Deque<ChartItem<Float>>> transmitterItems = this.averageRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> transmitterItems = this.averageRssiByRByT
         .get(rxer);
 
     if (transmitterItems == null) {
-      transmitterItems = new ConcurrentHashMap<String, Deque<ChartItem<Float>>>();
+      transmitterItems = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
       this.averageRssiByRByT.put(rxer, transmitterItems);
     }
 
-    Deque<ChartItem<Float>> rssiQueue = transmitterItems.get(txer);
+    NavigableSet<ChartItem<Float>> rssiQueue = transmitterItems.get(txer);
     if (rssiQueue == null) {
-      rssiQueue = new LinkedBlockingDeque<ChartItem<Float>>();
+      rssiQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(
+          false));
       transmitterItems.put(txer, rssiQueue);
     }
 
     SimpleChartItem<Float> theItem = new SimpleChartItem<Float>(
         Float.valueOf(value), timestamp);
-    rssiQueue.offer(theItem);
+    rssiQueue.add(theItem);
     ++this.numRssiPoints;
     this.lastRssiUpdate = System.currentTimeMillis();
 
     long oldestTs = System.currentTimeMillis() - this.maxCacheAge;
 
     while (!rssiQueue.isEmpty()
-        && rssiQueue.peek().getCreationTime() < oldestTs) {
-      rssiQueue.poll();
+        && rssiQueue.first().getCreationTime() < oldestTs) {
+      rssiQueue.pollFirst();
       --this.numRssiPoints;
     }
 
@@ -353,71 +364,80 @@ public class DataCache2 implements Cloneable {
       return;
     }
 
-    Map<String, Deque<ChartItem<Float>>> transmitterItems = this.varianceRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> transmitterItems = this.varianceRssiByRByT
         .get(rxer);
 
     if (transmitterItems == null) {
-      transmitterItems = new ConcurrentHashMap<String, Deque<ChartItem<Float>>>();
+      transmitterItems = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
       this.varianceRssiByRByT.put(rxer, transmitterItems);
     }
 
-    Deque<ChartItem<Float>> varQueue = transmitterItems.get(txer);
+    NavigableSet<ChartItem<Float>> varQueue = transmitterItems.get(txer);
     if (varQueue == null) {
-      varQueue = new LinkedBlockingDeque<ChartItem<Float>>();
+      varQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(false));
       transmitterItems.put(txer, varQueue);
     }
 
     SimpleChartItem<Float> theItem = new SimpleChartItem<Float>(
         Float.valueOf(value), timestamp);
-    varQueue.offer(theItem);
+    varQueue.add(theItem);
     ++this.numVarPoints;
     this.lastVarianceUpdate = System.currentTimeMillis();
 
     long oldestTs = System.currentTimeMillis() - this.maxCacheAge;
 
-    while (!varQueue.isEmpty() && varQueue.peek().getCreationTime() < oldestTs) {
-      varQueue.poll();
+    while (!varQueue.isEmpty() && varQueue.first().getCreationTime() < oldestTs) {
+      varQueue.pollFirst();
       --this.numVarPoints;
     }
   }
 
   public List<ChartItem<Float>> getRssiList(final String receiver,
-      final String transmitter) {
+      final String transmitter, long oldest, long youngest) {
 
-    Map<String, Deque<ChartItem<Float>>> receiverMap = this.averageRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverMap = this.averageRssiByRByT
         .get(receiver);
 
     if (receiverMap == null) {
       return null;
     }
 
-    Deque<ChartItem<Float>> transmitterQueue = receiverMap.get(transmitter);
+    NavigableSet<ChartItem<Float>> transmitterQueue = receiverMap
+        .get(transmitter);
     if (transmitterQueue == null) {
       return null;
     }
-
+    SimpleChartItem<Float> fromItem = new SimpleChartItem<Float>(0f,oldest);
+    SimpleChartItem<Float> toItem = new SimpleChartItem<Float>(0f,youngest);
+    NavigableSet<ChartItem<Float>> subset = transmitterQueue.subSet(fromItem, true, toItem, true);
+    
     LinkedList<ChartItem<Float>> returnedList = new LinkedList<ChartItem<Float>>();
-    returnedList.addAll(transmitterQueue);
+    returnedList.addAll(subset);
     return returnedList;
   }
 
   public List<ChartItem<Float>> getVarianceList(final String receiver,
-      final String transmitter) {
+      final String transmitter, final long oldest, final long youngest) {
 
-    Map<String, Deque<ChartItem<Float>>> receiverMap = this.varianceRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverMap = this.varianceRssiByRByT
         .get(receiver);
 
     if (receiverMap == null) {
       return null;
     }
 
-    Deque<ChartItem<Float>> transmitterQueue = receiverMap.get(transmitter);
+    NavigableSet<ChartItem<Float>> transmitterQueue = receiverMap
+        .get(transmitter);
     if (transmitterQueue == null) {
       return null;
     }
 
+    SimpleChartItem<Float> fromItem = new SimpleChartItem<Float>(0f,oldest);
+    SimpleChartItem<Float> toItem = new SimpleChartItem<Float>(0f,youngest);
+    NavigableSet<ChartItem<Float>> subset = transmitterQueue.subSet(fromItem, true, toItem, true);
+    
     LinkedList<ChartItem<Float>> returnedList = new LinkedList<ChartItem<Float>>();
-    returnedList.addAll(transmitterQueue);
+    returnedList.addAll(subset);
     return returnedList;
   }
 
@@ -477,10 +497,10 @@ public class DataCache2 implements Cloneable {
   public float getRssiAt(final String transmitter, final String receiver,
       long timeOffset, long window) {
 
-    long desiredOrJustAfter = this.isClone ? this.creationTs - timeOffset
+    long desiredOrJustBefore = this.isClone ? this.creationTs - timeOffset
         : System.currentTimeMillis() - timeOffset;
 
-    Map<String, Deque<ChartItem<Float>>> receiverSamples = this.averageRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverSamples = this.averageRssiByRByT
         .get(receiver);
 
     if (receiverSamples == null) {
@@ -488,22 +508,28 @@ public class DataCache2 implements Cloneable {
       return Float.NaN;
     }
 
-    Deque<ChartItem<Float>> transmitterSamples = receiverSamples
+    NavigableSet<ChartItem<Float>> transmitterSamples = receiverSamples
         .get(transmitter);
 
     if (transmitterSamples == null) {
       // log.warn("No samples for {}", transmitter);
       return Float.NaN;
     }
+
+    SimpleChartItem<Float> searchItem = new SimpleChartItem<Float>(0f,
+        desiredOrJustBefore);
+    NavigableSet<ChartItem<Float>> itemsBefore = transmitterSamples.headSet(
+        searchItem, true);
+
     float theValue = Float.NaN;
     // From oldest to newest
-    for (Iterator<ChartItem<Float>> iter = transmitterSamples.iterator(); iter
+    for (Iterator<ChartItem<Float>> iter = itemsBefore.iterator(); iter
         .hasNext();) {
       ChartItem<Float> someItem = iter.next();
-      if (someItem.getCreationTime() < desiredOrJustAfter - window) {
+      if (someItem.getCreationTime() < desiredOrJustBefore - window) {
         continue;
       }
-      if (someItem.getCreationTime() >= desiredOrJustAfter) {
+      if (someItem.getCreationTime() >= desiredOrJustBefore) {
         break;
       }
 
@@ -526,7 +552,7 @@ public class DataCache2 implements Cloneable {
    */
   public ChartItem<Float> getCurrentRssiItem(final String transmitter,
       final String receiver) {
-    Map<String, Deque<ChartItem<Float>>> receiverSamples = this.averageRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverSamples = this.averageRssiByRByT
         .get(receiver);
 
     if (receiverSamples == null) {
@@ -534,7 +560,7 @@ public class DataCache2 implements Cloneable {
       return null;
     }
 
-    Deque<ChartItem<Float>> transmitterSamples = receiverSamples
+    NavigableSet<ChartItem<Float>> transmitterSamples = receiverSamples
         .get(transmitter);
 
     if (transmitterSamples == null) {
@@ -542,7 +568,7 @@ public class DataCache2 implements Cloneable {
       return null;
     }
 
-    ChartItem<Float> mostRecent = transmitterSamples.peekLast();
+    ChartItem<Float> mostRecent = transmitterSamples.last();
 
     if (mostRecent == null) {
       return null;
@@ -591,21 +617,21 @@ public class DataCache2 implements Cloneable {
    */
   public ChartItem<Float> getCurrentVarianceItem(final String transmitter,
       final String receiver) {
-    Map<String, Deque<ChartItem<Float>>> receiverSamples = this.varianceRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverSamples = this.varianceRssiByRByT
         .get(receiver);
 
     if (receiverSamples == null) {
       return null;
     }
 
-    Deque<ChartItem<Float>> transmitterSamples = receiverSamples
+    NavigableSet<ChartItem<Float>> transmitterSamples = receiverSamples
         .get(transmitter);
 
     if (transmitterSamples == null) {
       return null;
     }
 
-    ChartItem<Float> mostRecent = transmitterSamples.peekLast();
+    ChartItem<Float> mostRecent = transmitterSamples.last();
 
     if (mostRecent == null) {
       return null;
@@ -623,10 +649,10 @@ public class DataCache2 implements Cloneable {
   public float getVarianceAt(final String transmitter, final String receiver,
       long timeOffset, long window) {
 
-    long desiredOrJustAfter = this.isClone ? this.creationTs - timeOffset
+    long desiredOrJustBefore = this.isClone ? this.creationTs - timeOffset
         : System.currentTimeMillis() - timeOffset;
 
-    Map<String, Deque<ChartItem<Float>>> receiverSamples = this.varianceRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverSamples = this.varianceRssiByRByT
         .get(receiver);
 
     if (receiverSamples == null) {
@@ -634,22 +660,29 @@ public class DataCache2 implements Cloneable {
       return Float.NaN;
     }
 
-    Deque<ChartItem<Float>> transmitterSamples = receiverSamples
+    NavigableSet<ChartItem<Float>> transmitterSamples = receiverSamples
         .get(transmitter);
 
     if (transmitterSamples == null) {
       // log.warn("No samples for {}", transmitter);
       return Float.NaN;
     }
+    SimpleChartItem<Float> searchItem = new SimpleChartItem<Float>(0f,
+        desiredOrJustBefore);
+    NavigableSet<ChartItem<Float>> itemsBefore = transmitterSamples.headSet(
+        searchItem, true);
+    
     float theValue = Float.NaN;
+    
+
     // From oldest to newest
-    for (Iterator<ChartItem<Float>> iter = transmitterSamples.iterator(); iter
+    for (Iterator<ChartItem<Float>> iter = itemsBefore.iterator(); iter
         .hasNext();) {
       ChartItem<Float> someItem = iter.next();
-      if (someItem.getCreationTime() < desiredOrJustAfter - window) {
+      if (someItem.getCreationTime() < desiredOrJustBefore - window) {
         continue;
       }
-      if (someItem.getCreationTime() > desiredOrJustAfter) {
+      if (someItem.getCreationTime() > desiredOrJustBefore) {
         break;
       }
 
@@ -683,8 +716,9 @@ public class DataCache2 implements Cloneable {
   }
 
   public DataCache2 clone() {
-    DataCache2 returnedCache = new DataCache2(new ConnectionHandler(), this.creationTs);
-    
+    DataCache2 returnedCache = new DataCache2(new ConnectionHandler(),
+        this.creationTs);
+
     returnedCache.isClone = true;
     this.overlay(returnedCache);
     return returnedCache;
@@ -704,10 +738,10 @@ public class DataCache2 implements Cloneable {
     this.regionImage = null;
     this.fiduciaryTransmitterIds.clear();
     this.numFidTxers = 0;
-    
+
     this.receiverIds.clear();
     this.numRxers = 0;
-    
+
     log.info("Region info and device locations cleared from cache.");
   }
 
@@ -718,13 +752,13 @@ public class DataCache2 implements Cloneable {
    */
   public void clearCachedData() {
     for (String rxer : this.averageRssiByRByT.keySet()) {
-      Map<String, Deque<ChartItem<Float>>> item = this.averageRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> item = this.averageRssiByRByT
           .get(rxer);
       if (item == null) {
         continue;
       }
       for (String txer : item.keySet()) {
-        Deque<ChartItem<Float>> deque = item.get(txer);
+        NavigableSet<ChartItem<Float>> deque = item.get(txer);
         if (deque == null) {
           continue;
         }
@@ -733,15 +767,15 @@ public class DataCache2 implements Cloneable {
       item.clear();
     }
     this.averageRssiByRByT.clear();
-    
+
     for (String rxer : this.varianceRssiByRByT.keySet()) {
-      Map<String, Deque<ChartItem<Float>>> item = this.varianceRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> item = this.varianceRssiByRByT
           .get(rxer);
       if (item == null) {
         continue;
       }
       for (String txer : item.keySet()) {
-        Deque<ChartItem<Float>> deque = item.get(txer);
+        NavigableSet<ChartItem<Float>> deque = item.get(txer);
         if (deque == null) {
           continue;
         }
@@ -750,7 +784,6 @@ public class DataCache2 implements Cloneable {
       item.clear();
     }
     this.varianceRssiByRByT.clear();
-    
 
     for (String rxer : this.sigToDistHistory.keySet()) {
       Deque<SignalToDistanceItem> deque = this.sigToDistHistory.get(rxer);
@@ -759,7 +792,7 @@ public class DataCache2 implements Cloneable {
       }
       deque.clear();
     }
-    
+
     this.sigToDistHistory.clear();
     this.numRssiPoints = 0;
     this.numVarPoints = 0;
@@ -794,9 +827,11 @@ public class DataCache2 implements Cloneable {
     return transmitters;
   }
 
+  // FIXME: Make cloneable!
   protected void overlay(final DataCache2 clone) {
     clone.clearAll();
-//    clone.taskTimer.cancel();
+
+    // clone.taskTimer.cancel();
 
     int cloneNumRssi = 0, cloneNumVar = 0;
 
@@ -827,14 +862,14 @@ public class DataCache2 implements Cloneable {
     clone.numSigToDistPoints = this.numSigToDistPoints;
 
     for (String receiver : this.averageRssiByRByT.keySet()) {
-      Map<String, Deque<ChartItem<Float>>> receiverQueues = this.averageRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> receiverQueues = this.averageRssiByRByT
           .get(receiver);
-      ConcurrentHashMap<String, Deque<ChartItem<Float>>> cloneReceiverQueues = new ConcurrentHashMap<String, Deque<ChartItem<Float>>>();
+      ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>> cloneReceiverQueues = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
       clone.averageRssiByRByT.put(receiver, cloneReceiverQueues);
       for (String transmitter : receiverQueues.keySet()) {
-        Deque<ChartItem<Float>> transmitterQueue = receiverQueues
+        NavigableSet<ChartItem<Float>> transmitterQueue = receiverQueues
             .get(transmitter);
-        LinkedBlockingDeque<ChartItem<Float>> cloneTransmitterQueue = new LinkedBlockingDeque<ChartItem<Float>>();
+        NavigableSet<ChartItem<Float>> cloneTransmitterQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(false));
         cloneReceiverQueues.put(transmitter, cloneTransmitterQueue);
         cloneTransmitterQueue.addAll(transmitterQueue);
         cloneNumRssi += cloneTransmitterQueue.size();
@@ -842,14 +877,14 @@ public class DataCache2 implements Cloneable {
     }
 
     for (String receiver : this.varianceRssiByRByT.keySet()) {
-      Map<String, Deque<ChartItem<Float>>> receiverQueues = this.varianceRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> receiverQueues = this.varianceRssiByRByT
           .get(receiver);
-      ConcurrentHashMap<String, Deque<ChartItem<Float>>> cloneReceiverQueues = new ConcurrentHashMap<String, Deque<ChartItem<Float>>>();
+      ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>> cloneReceiverQueues = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
       clone.varianceRssiByRByT.put(receiver, cloneReceiverQueues);
       for (String transmitter : receiverQueues.keySet()) {
-        Deque<ChartItem<Float>> transmitterQueue = receiverQueues
+        NavigableSet<ChartItem<Float>> transmitterQueue = receiverQueues
             .get(transmitter);
-        LinkedBlockingDeque<ChartItem<Float>> cloneTransmitterQueue = new LinkedBlockingDeque<ChartItem<Float>>();
+        NavigableSet<ChartItem<Float>> cloneTransmitterQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(false));
         cloneReceiverQueues.put(transmitter, cloneTransmitterQueue);
         cloneTransmitterQueue.addAll(transmitterQueue);
         cloneNumVar += cloneTransmitterQueue.size();
@@ -906,21 +941,21 @@ public class DataCache2 implements Cloneable {
       return;
     }
     long oldestTs = System.currentTimeMillis() - this.maxCacheAge;
-    for (Map<String, Deque<ChartItem<Float>>> rxerMap : this.averageRssiByRByT
+    for (Map<String, NavigableSet<ChartItem<Float>>> rxerMap : this.averageRssiByRByT
         .values()) {
-      for (Deque<ChartItem<Float>> txerQ : rxerMap.values()) {
-        while (!txerQ.isEmpty() && txerQ.peek().getCreationTime() < oldestTs) {
-          txerQ.poll();
+      for (NavigableSet<ChartItem<Float>> txerQ : rxerMap.values()) {
+        while (!txerQ.isEmpty() && txerQ.first().getCreationTime() < oldestTs) {
+          txerQ.pollFirst();
           --this.numRssiPoints;
         }
       }
     }
 
-    for (Map<String, Deque<ChartItem<Float>>> rxerMap : this.varianceRssiByRByT
+    for (Map<String, NavigableSet<ChartItem<Float>>> rxerMap : this.varianceRssiByRByT
         .values()) {
-      for (Deque<ChartItem<Float>> txerQ : rxerMap.values()) {
-        while (!txerQ.isEmpty() && txerQ.peek().getCreationTime() < oldestTs) {
-          txerQ.poll();
+      for (NavigableSet<ChartItem<Float>> txerQ : rxerMap.values()) {
+        while (!txerQ.isEmpty() && txerQ.first().getCreationTime() < oldestTs) {
+          txerQ.pollFirst();
           --this.numVarPoints;
         }
       }
@@ -941,7 +976,7 @@ public class DataCache2 implements Cloneable {
   }
 
   protected void updateStats() {
-//    log.debug("Updating statistics.");
+    // log.debug("Updating statistics.");
     this.statsPanel.setNumRxers(this.numRxers);
     this.statsPanel.setNumFidTxers(this.numFidTxers);
     this.statsPanel.setNumRssiPoints(this.numRssiPoints);
@@ -955,14 +990,6 @@ public class DataCache2 implements Cloneable {
 
   public static Logger getLog() {
     return log;
-  }
-
-  public Map<String, Map<String, Deque<ChartItem<Float>>>> getAverageRssiByRByT() {
-    return averageRssiByRByT;
-  }
-
-  public Map<String, Map<String, Deque<ChartItem<Float>>>> getVarianceRssiByRByT() {
-    return varianceRssiByRByT;
   }
 
   public long getLastRssiUpdate() {
@@ -988,7 +1015,7 @@ public class DataCache2 implements Cloneable {
 
           DataCache2.this.toStream(file.getPath(), out);
         } catch (Exception e) {
-          log.error("Unable to save file.",e);
+          log.error("Unable to save file.", e);
         }
       }
     };
@@ -1112,7 +1139,7 @@ public class DataCache2 implements Cloneable {
 
       out.writeObject(rxer);
       // Grab a map, clone it if it's not null
-      Map<String, Deque<ChartItem<Float>>> cacheRxMap = DataCache2.this.averageRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> cacheRxMap = DataCache2.this.averageRssiByRByT
           .get(rxer);
 
       if (cacheRxMap != null) {
@@ -1123,7 +1150,7 @@ public class DataCache2 implements Cloneable {
         out.writeObject(Integer.valueOf(txers.size()));
 
         for (String txer : txers) {
-          Deque<ChartItem<Float>> cacheTxItems = cacheRxMap.get(txer);
+          NavigableSet<ChartItem<Float>> cacheTxItems = cacheRxMap.get(txer);
           if (cacheTxItems != null) {
             // Be sure to write receiver, txer, deque so we can reconstruct
             // later
@@ -1151,7 +1178,7 @@ public class DataCache2 implements Cloneable {
 
       out.writeObject(rxer);
       // Grab a map, clone it if it's not null
-      Map<String, Deque<ChartItem<Float>>> cacheRxMap = DataCache2.this.varianceRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> cacheRxMap = DataCache2.this.varianceRssiByRByT
           .get(rxer);
 
       if (cacheRxMap != null) {
@@ -1161,7 +1188,7 @@ public class DataCache2 implements Cloneable {
         // Number of transmitters mapped for this receiver
         out.writeObject(Integer.valueOf(txers.size()));
         for (String txer : txers) {
-          Deque<ChartItem<Float>> cacheTxItems = cacheRxMap.get(txer);
+          NavigableSet<ChartItem<Float>> cacheTxItems = cacheRxMap.get(txer);
           if (cacheTxItems != null) {
             // Be sure to write receiver, txer, deque so we can reconstruct
             // later
@@ -1272,18 +1299,18 @@ public class DataCache2 implements Cloneable {
     for (int i = 0; i < numRxers; ++i) {
       String rxer = (String) in.readObject();
 
-      Map<String, Deque<ChartItem<Float>>> cacheRxMap = this.averageRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> cacheRxMap = this.averageRssiByRByT
           .get(rxer);
 
       if (cacheRxMap == null) {
-        cacheRxMap = new ConcurrentHashMap<String, Deque<ChartItem<Float>>>();
+        cacheRxMap = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
         this.averageRssiByRByT.put(rxer, cacheRxMap);
       }
       // Number of transmitters
       int numTxers = ((Integer) in.readObject()).intValue();
       for (int j = 0; j < numTxers; ++j) {
         String txer = (String) in.readObject();
-        Deque<ChartItem<Float>> fileTxItems = (Deque<ChartItem<Float>>) in
+        NavigableSet<ChartItem<Float>> fileTxItems = (NavigableSet<ChartItem<Float>>) in
             .readObject();
         this.numRssiPoints += fileTxItems.size();
         cacheRxMap.put(txer, fileTxItems);
@@ -1296,18 +1323,18 @@ public class DataCache2 implements Cloneable {
     for (int i = 0; i < numRxers; ++i) {
       String rxer = (String) in.readObject();
 
-      Map<String, Deque<ChartItem<Float>>> cacheRxMap = this.varianceRssiByRByT
+      Map<String, NavigableSet<ChartItem<Float>>> cacheRxMap = this.varianceRssiByRByT
           .get(rxer);
 
       if (cacheRxMap == null) {
-        cacheRxMap = new ConcurrentHashMap<String, Deque<ChartItem<Float>>>();
+        cacheRxMap = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
         this.varianceRssiByRByT.put(rxer, cacheRxMap);
       }
       // Number of transmitters
       int numTxers = ((Integer) in.readObject()).intValue();
       for (int j = 0; j < numTxers; ++j) {
         String txer = (String) in.readObject();
-        Deque<ChartItem<Float>> fileTxItems = (Deque<ChartItem<Float>>) in
+        NavigableSet<ChartItem<Float>> fileTxItems = (NavigableSet<ChartItem<Float>>) in
             .readObject();
         this.numVarPoints += fileTxItems.size();
         cacheRxMap.put(txer, fileTxItems);

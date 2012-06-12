@@ -83,13 +83,13 @@ public class FilteringDataCache extends DataCache2 {
 
   @Override
   public List<ChartItem<Float>> getRssiList(final String receiverId,
-      final String transmitterId) {
+      final String transmitterId, long oldest, long youngest) {
     if (this.allowedDevices.size() == 0) {
-      return super.getRssiList(receiverId, transmitterId);
+      return super.getRssiList(receiverId, transmitterId,oldest,youngest);
     }
     if (this.allowedDevices.contains(receiverId)
         && this.allowedDevices.contains(transmitterId)) {
-      return super.getRssiList(receiverId, transmitterId);
+      return super.getRssiList(receiverId, transmitterId,oldest,youngest);
     }
 
     return null;
@@ -97,13 +97,13 @@ public class FilteringDataCache extends DataCache2 {
 
   @Override
   public List<ChartItem<Float>> getVarianceList(final String receiverId,
-      final String transmitterId) {
+      final String transmitterId, final long oldest, final long youngest) {
     if (this.allowedDevices.size() == 0) {
-      return super.getVarianceList(receiverId, transmitterId);
+      return super.getVarianceList(receiverId, transmitterId, oldest, youngest);
     }
     if (this.allowedDevices.contains(receiverId)
         && this.allowedDevices.contains(transmitterId)) {
-      return super.getVarianceList(receiverId, transmitterId);
+      return super.getVarianceList(receiverId, transmitterId, oldest, youngest);
     }
     return null;
   }

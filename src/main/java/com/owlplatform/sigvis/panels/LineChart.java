@@ -351,10 +351,16 @@ public class LineChart extends JComponent implements DisplayPanel,
 
   protected Collection<ChartItem<Float>> generateDisplayedData(String txer,
       String rxer) {
+    long youngestItem = this.lastRepaint - this.timeOffset;
+    if (this.cache.isClone()) {
+      youngestItem = this.cache.getCreationTs() - this.timeOffset;
+    }
+    long oldestItem = youngestItem - this.maxAge;
+    
     if (this.type == ValueType.RSSI) {
-      return this.cache.getRssiList(rxer, txer);
+      return this.cache.getRssiList(rxer, txer,oldestItem,youngestItem);
     } else if (this.type == ValueType.VARIANCE) {
-      return this.cache.getVarianceList(rxer, txer);
+      return this.cache.getVarianceList(rxer, txer, oldestItem, youngestItem);
     }
     return null;
   }

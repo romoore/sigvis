@@ -292,7 +292,15 @@ public class RssiStDvLineChart extends LineChart {
   @Override
   protected Collection<ChartItem<Float>> generateDisplayedData(String txer,
       String rxer) {
-    return this.cache.getRssiList(rxer, txer);
+    long currentTime = this.lastRepaint;
+
+    long youngestItem = this.lastRepaint - this.timeOffset;
+    if (this.cache.isClone()) {
+      youngestItem = this.cache.getCreationTs() - this.timeOffset;
+      currentTime = this.cache.getCreationTs();
+    }
+    long oldestItem = youngestItem - this.maxAge;
+    return this.cache.getRssiList(rxer, txer,oldestItem, youngestItem);
   }
 
   @Override

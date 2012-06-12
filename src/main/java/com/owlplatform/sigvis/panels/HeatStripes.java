@@ -251,8 +251,8 @@ public class HeatStripes extends JComponent implements DisplayPanel,
         ++itemIndex;
         // Get the history of data points
         List<ChartItem<Float>> devItems = (this.type == ValueType.RSSI ? this.cache
-            .getRssiList(recHash, devHash) : this.cache.getVarianceList(
-            recHash, devHash));
+            .getRssiList(recHash, devHash,oldestItem, youngestItem) : this.cache.getVarianceList(
+            recHash, devHash, oldestItem, youngestItem));
 
         // No data, then skip this pairing
         if (devItems == null) {

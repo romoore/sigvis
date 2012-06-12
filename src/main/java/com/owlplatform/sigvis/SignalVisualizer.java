@@ -57,12 +57,12 @@ public class SignalVisualizer {
       + "SigVis comes with ABSOLUTELY NO WARRANTY.<br />"
       + "This is free software, and you are welcome to redistribute it<br />"
       + "under certain conditions; see the included file LICENSE for details.</p>"
-      + "<p style=\"font:small;\">SigVis makes use of the following external libraries:" +
+      + "<p style=\"font:small;\">SigVis makes use of the following external libraries:</p>" +
       "<ul style=\"font:small;\">" +
-      "<li>\"Delaunay\" Copyright &copy; 2005, 2007 by Paul Chew (http://www.cs.cornell.edu/home/chew/Delaunay.html)</li>" +
-      "<li>\"Compgeom\" Copyright &copy; 2010 by Bart Kiers (http://big-o.nl/apps/compgeom/)</li>" +
+      "<li>\"Delaunay\" Copyright &copy; 2005, 2007 by Paul Chew <br />http://www.cs.cornell.edu/home/chew/Delaunay.html</li>" +
+      "<li>\"Compgeom\" Copyright &copy; 2010 by Bart Kiers <br />http://big-o.nl/apps/compgeom/</li>" +
       "</ul>" +
-      "Please see the included LICENSE and README files for full copyright details.</p>";
+      "<p style=\"font: small;\">Please see the included LICENSE and README files<br />for full copyright details.</p>";
 
   public static final String ABOUT_TXT = TITLE
       + " version "

@@ -115,7 +115,19 @@ public class AmbientCloud extends RssiStDvLineChart {
   @Override
   protected Collection<ChartItem<Float>> generateDisplayedData(String txer,
       String rxer) {
-    return this.cache.getRssiList(rxer, txer);
+    long currentTime = System.currentTimeMillis();
+
+    // Bump 5 seconds to right side
+    long youngestItem = currentTime - this.timeOffset;
+    if (this.cache.isClone()) {
+      currentTime = this.cache.getCreationTs();
+      youngestItem = currentTime - this.timeOffset;
+
+    }
+    // Bump 5 seconds to left side
+    long oldestItem = youngestItem - this.maxAge - 5000l;
+    
+    return this.cache.getRssiList(rxer, txer,oldestItem, youngestItem);
   }
 
   @Override
