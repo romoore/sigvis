@@ -193,21 +193,15 @@
 			<type>jar</type>
 		</dependency>
 		<dependency>
-			<groupId>org.grailrtls</groupId>
+			<groupId>com.owlplatform</groupId>
 			<artifactId>libworldmodel</artifactId>
-			<version>3.0.4-SNAPSHOT</version>
+			<version>1.0.0</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
-			<groupId>org.grailrtls</groupId>
+			<groupId>com.owlplatform</groupId>
 			<artifactId>libsolver</artifactId>
-			<version>3.0.4-SNAPSHOT</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>nl.big-o</groupId>
-			<artifactId>compgeom</artifactId>
-			<version>0.3</version>
+			<version>1.0.0</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -216,6 +210,12 @@
 			<version>0.1</version>
 			<type>jar</type>
 		</dependency>
+    <dependency>
+      <groupId>nl.big-o</groupId>
+      <artifactId>compgeom</artifactId>
+      <version>0.3</version>
+      <type>jar</type>
+    </dependency>
 	</dependencies>
 
 	<url>https://github.com/OwlPlatform/sigvis</url>

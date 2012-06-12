@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
@@ -36,27 +35,19 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 
-import org.grailrtls.libcommon.util.NumericUtils;
-import org.grailrtls.libcommon.util.OnlineVariance;
-import org.grailrtls.libcommon.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.owlplatform.common.util.Pair;
 import com.owlplatform.sigvis.DataCache2;
-import com.owlplatform.sigvis.structs.Item2DPoint;
 import com.owlplatform.sigvis.structs.SignalToDistanceItem;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -16,46 +16,30 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 package com.owlplatform.sigvis.panels;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.swing.JPanel;
-
-import org.grailrtls.libcommon.SampleMessage;
-import org.grailrtls.libcommon.util.HashableByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.owlplatform.sigvis.DataCache2;
 import com.owlplatform.sigvis.DataCache2.ValueType;
-import com.owlplatform.sigvis.structs.ChartItem;
 import com.owlplatform.sigvis.structs.RSSILine;
-
-import compgeom.RLine2D;
 import compgeom.RLineSegment2D;
 import compgeom.RPoint2D;
 import compgeom.Rational;
 import compgeom.algorithms.BentleyOttmann;
-import compgeom.algorithms.ShamosHoey;
 
 public class IntersectionLineMap extends SignalLineMap {
 

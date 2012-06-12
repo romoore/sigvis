@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -35,16 +35,13 @@ import javax.imageio.ImageIO;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import org.grailrtls.libworldmodel.client.ClientWorldConnection;
-import org.grailrtls.libworldmodel.client.Response;
-import org.grailrtls.libworldmodel.client.StepResponse;
-import org.grailrtls.libworldmodel.client.WorldState;
-import org.grailrtls.libworldmodel.client.protocol.messages.Attribute;
-import org.grailrtls.libworldmodel.types.ByteArrayConverter;
-import org.grailrtls.libworldmodel.types.DataConverter;
-import org.grailrtls.libworldmodel.types.DoubleConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.owlplatform.worldmodel.types.ByteArrayConverter;
+import com.owlplatform.worldmodel.types.DataConverter;
+import com.owlplatform.worldmodel.types.DoubleConverter;
 
 public class SignalVisualizer {
 
@@ -56,10 +53,16 @@ public class SignalVisualizer {
       + " version "
       + VERSION
       + "</h2><p>Signal Visualization tools for the Make Sense Platform.</p>"
-      + "<p style=\"font: smaller;\">Copyright &copy; 2012 Robert Moore and Rutgers University<br />"
+      + "<p style=\"font: small;\">Copyright &copy; 2012 Robert Moore and Rutgers University<br />"
       + "SigVis comes with ABSOLUTELY NO WARRANTY.<br />"
       + "This is free software, and you are welcome to redistribute it<br />"
-      + "under certain conditions; see the included file LICENSE for details.</p>";
+      + "under certain conditions; see the included file LICENSE for details.</p>"
+      + "<p style=\"font:small;\">SigVis makes use of the following external libraries:" +
+      "<ul style=\"font:small;\">" +
+      "<li>\"Delaunay\" Copyright &copy; 2005, 2007 by Paul Chew (http://www.cs.cornell.edu/home/chew/Delaunay.html)</li>" +
+      "<li>\"Compgeom\" Copyright &copy; 2010 by Bart Kiers (http://big-o.nl/apps/compgeom/)</li>" +
+      "</ul>" +
+      "Please see the included LICENSE and README files for full copyright details.</p>";
 
   public static final String ABOUT_TXT = TITLE
       + " version "
@@ -69,7 +72,11 @@ public class SignalVisualizer {
       + "Copyright (C) 2012 Robert Moore and Rutgers University\n"
       + "SigVis comes with ABSOLUTELY NO WARRANTY.\n"
       + "This is free software, and you are welcome to redistribute it\n"
-      + "under certain conditions; see the included file LICENSE for details.\n";
+      + "under certain conditions; see the included file LICENSE for details.\n" +
+      "SigVis makes use of the following external libraries:\n" +
+      "* \"Delaunay\" Copyright (C) 2005, 2007 by Paul Chew (http://www.cs.cornell.edu/home/chew/Delaunay.html)\n" +
+      "* \"Compgeom\" Copyright (C) 2010 by Bart Kiers (http://big-o.nl/apps/compgeom/)\n" +
+      "Please see the included LICENSE and README files for full copyright details.\n";
 
   public static final Logger log = LoggerFactory
       .getLogger(SignalVisualizer.class);

@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -41,17 +41,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-
-import org.grailrtls.libworldmodel.client.ClientWorldConnection;
-import org.grailrtls.libworldmodel.client.Response;
-import org.grailrtls.libworldmodel.client.StepResponse;
-import org.grailrtls.libworldmodel.client.WorldState;
-import org.grailrtls.libworldmodel.client.protocol.messages.Attribute;
-import org.grailrtls.libworldmodel.types.ByteArrayConverter;
-import org.grailrtls.libworldmodel.types.DataConverter;
-import org.grailrtls.libworldmodel.types.DoubleConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.owlplatform.worldmodel.client.ClientWorldConnection;
+import com.owlplatform.worldmodel.client.Response;
+import com.owlplatform.worldmodel.client.StepResponse;
+import com.owlplatform.worldmodel.client.WorldState;
+import com.owlplatform.worldmodel.client.protocol.messages.Attribute;
+import com.owlplatform.worldmodel.types.ByteArrayConverter;
+import com.owlplatform.worldmodel.types.DataConverter;
+import com.owlplatform.worldmodel.types.DoubleConverter;
 
 public class ConnectionHandler {
 

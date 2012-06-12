@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@ package com.owlplatform.sigvis.panels;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -29,14 +28,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -48,16 +45,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.owlplatform.sigvis.DataCache2;
-import com.owlplatform.sigvis.ImageResources;
 import com.owlplatform.sigvis.DataCache2.ValueType;
+import com.owlplatform.sigvis.ImageResources;
 import com.owlplatform.sigvis.structs.ChartItem;
 
 public class LineChart extends JComponent implements DisplayPanel,

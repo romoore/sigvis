@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,6 @@
 
 package com.owlplatform.sigvis.panels;
 
-import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
@@ -34,10 +33,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
@@ -46,24 +42,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.imageio.ImageIO;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 
-import org.apache.mina.util.ConcurrentHashSet;
-import org.grailrtls.libcommon.util.HashableByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.owlplatform.sigvis.DataCache2;
-import com.owlplatform.sigvis.ImageResources;
 import com.owlplatform.sigvis.DataCache2.ValueType;
+import com.owlplatform.sigvis.ImageResources;
 import com.owlplatform.sigvis.structs.ChartItem;
-import com.owlplatform.sigvis.structs.SimpleChartItem;
 
 public class HeatStripes extends JComponent implements DisplayPanel,
     MouseListener, MouseWheelListener {

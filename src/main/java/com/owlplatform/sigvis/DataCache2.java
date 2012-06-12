@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -272,8 +272,6 @@ public class DataCache2 implements Cloneable {
 
   public void addRssi(final String rxerSensor, final String txerSensor,
       final float value, final long timestamp) {
-    // System.out.println("R: " + rxerSensor + " T: " + txerSensor + " -> " +
-    // value);
     String rxer = this.sensorToUri.get(rxerSensor);
     if (rxer == null) {
       // log.warn("Unknown receiver sensor: " + rxerSensor);
@@ -979,8 +977,6 @@ public class DataCache2 implements Cloneable {
     Thread saveThread = new Thread() {
       @Override
       public void run() {
-        System.out.println("Saving to " + file.getName());
-
         XStream xstream = new XStream();
 
         try {
@@ -992,10 +988,8 @@ public class DataCache2 implements Cloneable {
 
           DataCache2.this.toStream(file.getPath(), out);
         } catch (Exception e) {
-          System.err.println("Unable to save file.");
-          e.printStackTrace();
+          log.error("Unable to save file.",e);
         }
-        System.out.println("Save completed.");
       }
     };
     saveThread.start();

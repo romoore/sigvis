@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -33,19 +33,14 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JComponent;
 
-import org.grailrtls.libcommon.util.HashableByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.owlplatform.sigvis.DataCache2;
 import com.owlplatform.sigvis.DataCache2.ValueType;
-import com.owlplatform.sigvis.structs.ChartItem;
-import com.owlplatform.sigvis.structs.RSSILine;
 
 public class SignalLineMap extends JComponent implements DisplayPanel {
 

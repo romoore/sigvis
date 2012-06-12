@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -49,25 +49,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.grailrtls.libcommon.SampleMessage;
-import org.grailrtls.libcommon.util.HashableByteArray;
-import org.grailrtls.libcommon.util.OnlineVariance;
-import org.grailrtls.libsolver.SolverAggregatorInterface;
-import org.grailrtls.libsolver.listeners.SampleListener;
-import org.grailrtls.libworldmodel.client.ClientWorldModelInterface;
-import org.grailrtls.libworldmodel.client.listeners.DataListener;
-import org.grailrtls.libworldmodel.client.protocol.messages.AbstractRequestMessage;
-import org.grailrtls.libworldmodel.client.protocol.messages.Attribute;
-import org.grailrtls.libworldmodel.client.protocol.messages.AttributeAliasMessage;
-import org.grailrtls.libworldmodel.client.protocol.messages.DataResponseMessage;
-import org.grailrtls.libworldmodel.client.protocol.messages.OriginAliasMessage;
-import org.grailrtls.libworldmodel.client.protocol.messages.OriginPreferenceMessage;
-import org.grailrtls.libworldmodel.client.protocol.messages.SnapshotRequestMessage;
-import org.grailrtls.libworldmodel.client.protocol.messages.URISearchResponseMessage;
-import org.grailrtls.libworldmodel.types.DataConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.owlplatform.common.SampleMessage;
+import com.owlplatform.common.util.HashableByteArray;
+import com.owlplatform.common.util.OnlineVariance;
 import com.owlplatform.sigvis.panels.BarChart;
 import com.owlplatform.sigvis.panels.LineChart;
 import com.owlplatform.sigvis.panels.ScatterPlotPanel;
@@ -75,6 +63,19 @@ import com.owlplatform.sigvis.panels.SignalToDistanceMap;
 import com.owlplatform.sigvis.panels.SimpleHeatMap;
 import com.owlplatform.sigvis.panels.VoronoiHeatMap;
 import com.owlplatform.sigvis.structs.MutableListModel;
+import com.owlplatform.solver.SolverAggregatorInterface;
+import com.owlplatform.solver.listeners.SampleListener;
+import com.owlplatform.worldmodel.client.ClientWorldModelInterface;
+import com.owlplatform.worldmodel.client.listeners.DataListener;
+import com.owlplatform.worldmodel.client.protocol.messages.AbstractRequestMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.Attribute;
+import com.owlplatform.worldmodel.client.protocol.messages.AttributeAliasMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.DataResponseMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.OriginAliasMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.OriginPreferenceMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.SnapshotRequestMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.URISearchResponseMessage;
+import com.owlplatform.worldmodel.types.DataConverter;
 
 public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 		DataListener, ListSelectionListener,

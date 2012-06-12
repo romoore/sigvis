@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -33,14 +33,12 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 
-import org.grailrtls.libcommon.util.HashableByteArray;
-import org.grailrtls.libcommon.util.NumericUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.owlplatform.common.util.HashableByteArray;
 import com.owlplatform.sigvis.structs.Item2DPoint;
 
 public class SimpleHeatMap extends JComponent {

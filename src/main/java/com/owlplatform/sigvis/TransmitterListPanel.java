@@ -1,5 +1,5 @@
 /*
- * Signal Visualization Tools for Make Sense Platform
+ * Signal Visualization Tools for the Owl Platform
  * Copyright (C) 2012 Robert Moore
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -36,12 +36,12 @@ import javax.swing.table.TableModel;
 
 import org.apache.mina.filter.codec.statemachine.SkippingState;
 import org.apache.mina.util.ConcurrentHashSet;
-import org.grailrtls.libcommon.SampleMessage;
-import org.grailrtls.libcommon.util.HashableByteArray;
-import org.grailrtls.libsolver.SolverAggregatorInterface;
-import org.grailrtls.libsolver.listeners.SampleListener;
 
+import com.owlplatform.common.SampleMessage;
+import com.owlplatform.common.util.HashableByteArray;
 import com.owlplatform.sigvis.structs.MutableListModel;
+import com.owlplatform.solver.SolverAggregatorInterface;
+import com.owlplatform.solver.listeners.SampleListener;
 
 public class TransmitterListPanel extends JPanel implements SampleListener {
 	
