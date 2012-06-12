@@ -52,8 +52,8 @@ public class SignalVisualizer {
       + TITLE
       + " version "
       + VERSION
-      + "</h2><p>Signal Visualization tools for the Make Sense Platform.</p>"
-      + "<p style=\"font: small;\">Copyright &copy; 2012 Robert Moore and Rutgers University<br />"
+      + "</h2><p>Signal Visualization tools for the Owl Platform.</p>"
+      + "<p style=\"font: small;\">Copyright &copy; 2012 Robert Moore and the Owl Platform<br />"
       + "SigVis comes with ABSOLUTELY NO WARRANTY.<br />"
       + "This is free software, and you are welcome to redistribute it<br />"
       + "under certain conditions; see the included file LICENSE for details.</p>"
@@ -68,8 +68,8 @@ public class SignalVisualizer {
       + " version "
       + VERSION
       + "\n"
-      + "Signal Visualization tools for the Make Sense Platform.\n\n"
-      + "Copyright (C) 2012 Robert Moore and Rutgers University\n"
+      + "Signal Visualization tools for the Owl Platform.\n\n"
+      + "Copyright (C) 2012 Robert Moore and the Owl Platform\n"
       + "SigVis comes with ABSOLUTELY NO WARRANTY.\n"
       + "This is free software, and you are welcome to redistribute it\n"
       + "under certain conditions; see the included file LICENSE for details.\n" +
@@ -111,7 +111,11 @@ public class SignalVisualizer {
 
     }
 
-    SimpleFrame initialFrame = new SimpleFrame("SigVis v1.0.0-BETA", cache);
+    GraphicsSettings gfx = new GraphicsSettings();
+    if("true".equalsIgnoreCase(System.getProperty("sun.java2d.opengl"))){
+      gfx.setUseTransparency(true);
+    }
+    SimpleFrame initialFrame = new SimpleFrame("SigVis v1.0.0-BETA", cache,gfx);
     initialFrame.configureDisplay();
     if (wmHost != null) {
       if (handler.connectAsClient()) {

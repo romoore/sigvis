@@ -83,7 +83,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     ChangeListener, DataCache2Listener, WindowListener {
   private static final Logger log = LoggerFactory.getLogger(SimpleFrame.class);
 
-  protected int desiredFps = 10;
+  // protected int desiredFps = 10;
 
   private static final File FILE_NONE = new File("");
 
@@ -107,11 +107,14 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   protected int currentTimeOffset = 0;
 
+  protected GraphicsSettings gfxSettings = new GraphicsSettings();
+
   private final ConnectionOptionsPanel connectionPanel = new ConnectionOptionsPanel();
 
   private static final Set<SimpleFrame> allFrames = new ConcurrentHashSet<SimpleFrame>();
 
-  public SimpleFrame(String initialTitle, FilteringDataCache cache) {
+  public SimpleFrame(String initialTitle, FilteringDataCache cache,
+      GraphicsSettings settings) {
     super();
     allFrames.add(this);
     this.initialTitle = initialTitle;
@@ -128,6 +131,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
     FileFilter filter = new CacheFileFilter();
     this.fileChooser.addChoosableFileFilter(filter);
     this.fileChooser.setFileFilter(filter);
+    if (settings != null) {
+      this.gfxSettings = settings;
+    }
 
   }
 
@@ -144,6 +150,23 @@ public class SimpleFrame extends JFrame implements ActionListener,
   }
 
   public void configureDisplay() {
+
+    this.gfxAntiAlias.setSelected(this.gfxSettings.isUseAA());
+    this.gfxTransparent.setSelected(this.gfxSettings.isUseTransparency());
+    float fps = this.gfxSettings.getDesiredFps();
+    if (fps < 5f) {
+      this.refresh1hz.setSelected(true);
+    } else if (fps < 10) {
+      this.refresh5hz.setSelected(true);
+    } else if (fps < 15) {
+      this.refresh10hz.setSelected(true);
+    } else if (fps < 20) {
+      this.refresh15hz.setSelected(true);
+    } else if (fps < 30) {
+      this.refresh20hz.setSelected(true);
+    } else {
+      this.refresh30hz.setSelected(true);
+    }
 
     this.setTitle();
     this.addWindowListener(this);
@@ -173,7 +196,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.buildMenu();
 
     this.setJMenuBar(this.menu);
-    
+
     // Default to ambient variance chart
     AmbientCloud newChart = new AmbientCloud(this.cache);
     this.configureGfx(newChart);
@@ -183,9 +206,10 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.displayPanel.setMaxValue(-40f);
     this.displayPanel.setTimeOffset(this.currentTimeOffset);
     this.displayPanel.setMaxAge(30000l);
-    
+
     this.titleChartType = "Ambient Variance";
-    this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+    this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+        .getRegionUri()) + this.titleChartType;
     this.setTitle();
     this.add(newChart, BorderLayout.CENTER);
     this.validate();
@@ -295,8 +319,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
       "Max RSSI Map");
   protected JRadioButtonMenuItem visualizeMaxVarianceMap = new JRadioButtonMenuItem(
       "Max Var. Map");
-  
-  protected JRadioButtonMenuItem visualizeAmbient = new JRadioButtonMenuItem("Ambient Variance");
+
+  protected JRadioButtonMenuItem visualizeAmbient = new JRadioButtonMenuItem(
+      "Ambient Variance");
 
   protected JMenuItem gfxAntiAlias = new JCheckBoxMenuItem("Anti-Alias");
   protected JMenuItem gfxTransparent = new JCheckBoxMenuItem("Transparency");
@@ -484,7 +509,6 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizeMaxVarianceMap.addActionListener(this);
     this.visualizeRssiStDvLines.addActionListener(this);
     this.visualizeAmbient.addActionListener(this);
-    
 
     this.visualizeRssiBars.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
         acceleratorMask));
@@ -518,7 +542,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
         KeyEvent.VK_8, acceleratorMask | InputEvent.SHIFT_DOWN_MASK));
     this.visualizeRssiStDvLines.setAccelerator(KeyStroke.getKeyStroke(
         KeyEvent.VK_9, acceleratorMask));
-    this.visualizeAmbient.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,acceleratorMask));
+    this.visualizeAmbient.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,
+        acceleratorMask));
 
     this.visualizationGroup.add(this.visualizeRssiBars);
     this.visualizationGroup.add(this.visualizeVarianceBars);
@@ -537,7 +562,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
     this.visualizationGroup.add(this.visualizeMaxVarianceMap);
     this.visualizationGroup.add(this.visualizeRssiStDvLines);
     this.visualizationGroup.add(this.visualizeAmbient);
-    
+
     this.visualizeAmbient.setSelected(true);
 
     this.menu.add(this.visualizationMenu);
@@ -657,12 +682,17 @@ public class SimpleFrame extends JFrame implements ActionListener,
   }
 
   public void actionPerformed(ActionEvent e) {
-    if (e.getSource() == this.gfxAntiAlias && this.displayPanel != null) {
+    if (e.getSource() == this.gfxAntiAlias) {
+      this.gfxSettings.setUseAA(this.gfxAntiAlias.isSelected());
+      if (this.displayPanel != null) {
+        this.displayPanel.setAntiAlias(this.gfxSettings.isUseAA());
+      }
+    } else if (e.getSource() == this.gfxTransparent) {
+      this.gfxSettings.setUseTransparency(this.gfxTransparent.isSelected());
+      if (this.displayPanel != null) {
 
-      this.displayPanel.setAntiAlias(this.gfxAntiAlias.isSelected());
-    } else if (e.getSource() == this.gfxTransparent
-        && this.displayPanel != null) {
-      this.displayPanel.setTransparency(this.gfxTransparent.isSelected());
+        this.displayPanel.setTransparency(this.gfxSettings.isUseTransparency());
+      }
     }
 
     else if (e.getSource() == this.refresh1hz) {
@@ -690,7 +720,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setMinValue(-100f);
       this.displayPanel.setMaxValue(-20f);
       this.displayPanel.setMaxAge(this.staleDataAge);
-      
+
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       newChart.setDisplayedId(this.currentDeviceId);
       newChart.setDeviceIsTransmitter(this.isTransmitter);
@@ -858,7 +888,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "RSSI Stripes";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -882,7 +913,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Variance Stripes";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -906,7 +938,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "RSSI Lines";
-      this.panelTitle =(this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -930,7 +963,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Variance Lines";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -955,7 +989,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "RSSI Intersect.";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -980,7 +1015,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Variance Intersect.";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newMap, BorderLayout.CENTER);
       this.validate();
@@ -1003,7 +1039,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Max RSSI Map";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(heatMap, BorderLayout.CENTER);
       this.validate();
@@ -1026,7 +1063,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setDeviceIcon(this.isTransmitter ? this.transmitterIcon
           : this.receiverIcon);
       this.titleChartType = "Max Variance Map";
-      this.panelTitle =(this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(heatMap, BorderLayout.CENTER);
       this.validate();
@@ -1052,7 +1090,7 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.add(newChart, BorderLayout.CENTER);
       this.validate();
 
-    }else if (e.getSource() == this.visualizeAmbient) {
+    } else if (e.getSource() == this.visualizeAmbient) {
       if (this.mainPanel != null) {
         this.remove(this.mainPanel);
       }
@@ -1065,10 +1103,11 @@ public class SimpleFrame extends JFrame implements ActionListener,
       this.displayPanel.setTimeOffset(this.currentTimeOffset);
       this.displayPanel.setDisplayedId(this.currentDeviceId);
       this.displayPanel.setDeviceIsTransmitter(this.isTransmitter);
-//      this.displayPanel.setMaxAge(this.displayedHistory);
+      // this.displayPanel.setMaxAge(this.displayedHistory);
       this.displayPanel.setDisplayLegend(true);
       this.titleChartType = "Ambient Variance";
-      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache.getRegionUri()) + this.titleChartType;
+      this.panelTitle = (this.cache.getRegionUri() == null ? "" : this.cache
+          .getRegionUri()) + this.titleChartType;
       this.setTitle();
       this.add(newChart, BorderLayout.CENTER);
       this.validate();
@@ -1245,7 +1284,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
   private void quit() {
     if (this.isVisible()) {
       int response = JOptionPane.showConfirmDialog(this,
-          "Are you sure you want to quit?", "Exit "+SignalVisualizer.TITLE, JOptionPane.OK_CANCEL_OPTION);
+          "Are you sure you want to quit?", "Exit " + SignalVisualizer.TITLE,
+          JOptionPane.OK_CANCEL_OPTION);
       if (response != JOptionPane.OK_OPTION) {
         return;
       }
@@ -1425,13 +1465,14 @@ public class SimpleFrame extends JFrame implements ActionListener,
   }
 
   protected void openNewWindow() {
-    SimpleFrame newFrame = new SimpleFrame(this.initialTitle, this.cache);
+    SimpleFrame newFrame = new SimpleFrame(this.initialTitle, this.cache,
+        this.gfxSettings);
     newFrame.configureDisplay();
   }
 
   protected void cloneNewWindow() {
     SimpleFrame newFrame = new SimpleFrame(this.initialTitle,
-        this.cache.clone());
+        this.cache.clone(), this.gfxSettings);
     newFrame.configureDisplay();
   }
 
@@ -1484,12 +1525,8 @@ public class SimpleFrame extends JFrame implements ActionListener,
     ++SimpleFrame.numWindows;
   }
 
-  public int getDesiredFps() {
-    return desiredFps;
-  }
-
   public void setDesiredFps(int desiredFps) {
-    this.desiredFps = desiredFps;
+    this.gfxSettings.setDesiredFps(desiredFps);
 
     if (this.updateTask != null) {
       this.updateTask.cancel();
@@ -1502,8 +1539,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
           }
         }
       };
-      this.updateTimer.schedule(this.updateTask, 1000 / this.desiredFps,
-          1000 / this.desiredFps);
+      this.updateTimer.schedule(this.updateTask,
+          1000 / this.gfxSettings.getDesiredFps(),
+          1000 / this.gfxSettings.getDesiredFps());
     }
   }
 
@@ -1567,8 +1605,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
   }
 
   public void startUpdates() {
-    
-    // TODO: Somewhere! Listener that detects if 5 seconds since last cache update. Display JProgress bar .
+
+    // TODO: Somewhere! Listener that detects if 5 seconds since last cache
+    // update. Display JProgress bar .
     this.updateTask = new TimerTask() {
 
       @Override
@@ -1578,8 +1617,9 @@ public class SimpleFrame extends JFrame implements ActionListener,
         }
       }
     };
-    this.updateTimer.schedule(this.updateTask, 1000 / this.desiredFps,
-        1000 / this.desiredFps);
+    this.updateTimer.schedule(this.updateTask,
+        1000 / this.gfxSettings.getDesiredFps(),
+        1000 / this.gfxSettings.getDesiredFps());
   }
 
   @Override
