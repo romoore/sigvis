@@ -40,12 +40,12 @@ public class FilteringDataCache extends DataCache2 {
 
   protected final ConcurrentHashSet<String> allowedDevices = new ConcurrentHashSet<String>();
 
-  public FilteringDataCache(ConnectionHandler handler){
+  public FilteringDataCache(ConnectionHandler handler) {
     super(handler);
   }
 
   public FilteringDataCache(ConnectionHandler handler, final long timestamp) {
-    super(handler,timestamp);
+    super(handler, timestamp);
   }
 
   public void addAllowedDevice(String deviceId) {
@@ -85,11 +85,11 @@ public class FilteringDataCache extends DataCache2 {
   public List<ChartItem<Float>> getRssiList(final String receiverId,
       final String transmitterId, long oldest, long youngest) {
     if (this.allowedDevices.size() == 0) {
-      return super.getRssiList(receiverId, transmitterId,oldest,youngest);
+      return super.getRssiList(receiverId, transmitterId, oldest, youngest);
     }
     if (this.allowedDevices.contains(receiverId)
         && this.allowedDevices.contains(transmitterId)) {
-      return super.getRssiList(receiverId, transmitterId,oldest,youngest);
+      return super.getRssiList(receiverId, transmitterId, oldest, youngest);
     }
 
     return null;
@@ -109,12 +109,13 @@ public class FilteringDataCache extends DataCache2 {
   }
 
   @Override
-  public List<SignalToDistanceItem> getSignalToDistance(final String receiverId) {
+  public List<SignalToDistanceItem> getSignalToDistance(
+      final String receiverId, final long oldest, final long youngest) {
     if (this.allowedDevices.size() == 0) {
-      return super.getSignalToDistance(receiverId);
+      return super.getSignalToDistance(receiverId, oldest, youngest);
     }
     if (this.allowedDevices.contains(receiverId)) {
-      return super.getSignalToDistance(receiverId);
+      return super.getSignalToDistance(receiverId,oldest,youngest);
     }
     return null;
   }
@@ -180,9 +181,10 @@ public class FilteringDataCache extends DataCache2 {
 
   @Override
   public FilteringDataCache clone() {
-    FilteringDataCache returnedCache = new FilteringDataCache(new ConnectionHandler(),
-        this.isClone ? this.getCreationTs() : System.currentTimeMillis());
-    
+    FilteringDataCache returnedCache = new FilteringDataCache(
+        new ConnectionHandler(), this.isClone ? this.getCreationTs()
+            : System.currentTimeMillis());
+
     returnedCache.isClone = true;
     this.overlay(returnedCache);
     return returnedCache;

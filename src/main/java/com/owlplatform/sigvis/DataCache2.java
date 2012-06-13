@@ -172,7 +172,7 @@ public class DataCache2 implements Cloneable {
    * receiver-fiduciary transmitter pairs. Mapped by receiver.
    */
   @XStreamAlias("sigToDistHistory")
-  protected Map<String, Deque<SignalToDistanceItem>> sigToDistHistory = new ConcurrentHashMap<String, Deque<SignalToDistanceItem>>();
+  protected Map<String, NavigableSet<SignalToDistanceItem>> sigToDistHistory = new ConcurrentHashMap<String, NavigableSet<SignalToDistanceItem>>();
 
   /**
    * Flag to indicate whether this cache is a clone of another (live) cache.
@@ -304,15 +304,16 @@ public class DataCache2 implements Cloneable {
 
     NavigableSet<ChartItem<Float>> rssiQueue = transmitterItems.get(txer);
     if (rssiQueue == null) {
-      rssiQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(
-          false));
+      rssiQueue = new ConcurrentSkipListSet<ChartItem<Float>>(
+          new ChartItemTimeComparator(false));
       transmitterItems.put(txer, rssiQueue);
     }
 
     SimpleChartItem<Float> theItem = new SimpleChartItem<Float>(
         Float.valueOf(value), timestamp);
-    rssiQueue.add(theItem);
-    ++this.numRssiPoints;
+    if (rssiQueue.add(theItem)) {
+      ++this.numRssiPoints;
+    }
     this.lastRssiUpdate = System.currentTimeMillis();
 
     long oldestTs = System.currentTimeMillis() - this.maxCacheAge;
@@ -334,17 +335,19 @@ public class DataCache2 implements Cloneable {
         recPoint.getX() - transPoint.getX(), 2)
         + Math.pow(recPoint.getY() - transPoint.getY(), 2));
     SignalToDistanceItem newSigToDist = new SignalToDistanceItem(rxer, txer,
-        distance, value);
-    Deque<SignalToDistanceItem> history = this.sigToDistHistory.get(rxer);
+        distance, value, timestamp);
+    NavigableSet<SignalToDistanceItem> history = this.sigToDistHistory
+        .get(rxer);
     if (history == null) {
-      history = new LinkedBlockingDeque<SignalToDistanceItem>();
+      history = new ConcurrentSkipListSet<SignalToDistanceItem>();
       this.sigToDistHistory.put(rxer, history);
     }
-    history.offer(newSigToDist);
-    ++this.numSigToDistPoints;
+    if (history.add(newSigToDist)) {
+      ++this.numSigToDistPoints;
+    }
     // Trim the old values
-    while (!history.isEmpty() && history.peek().getCreationTime() < oldestTs) {
-      history.poll();
+    while (!history.isEmpty() && history.first().getCreationTime() < oldestTs) {
+      history.pollFirst();
       --this.numSigToDistPoints;
     }
     // End signal to distance
@@ -374,14 +377,16 @@ public class DataCache2 implements Cloneable {
 
     NavigableSet<ChartItem<Float>> varQueue = transmitterItems.get(txer);
     if (varQueue == null) {
-      varQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(false));
+      varQueue = new ConcurrentSkipListSet<ChartItem<Float>>(
+          new ChartItemTimeComparator(false));
       transmitterItems.put(txer, varQueue);
     }
 
     SimpleChartItem<Float> theItem = new SimpleChartItem<Float>(
         Float.valueOf(value), timestamp);
-    varQueue.add(theItem);
-    ++this.numVarPoints;
+    if (varQueue.add(theItem)) {
+      ++this.numVarPoints;
+    }
     this.lastVarianceUpdate = System.currentTimeMillis();
 
     long oldestTs = System.currentTimeMillis() - this.maxCacheAge;
@@ -407,10 +412,11 @@ public class DataCache2 implements Cloneable {
     if (transmitterQueue == null) {
       return null;
     }
-    SimpleChartItem<Float> fromItem = new SimpleChartItem<Float>(0f,oldest);
-    SimpleChartItem<Float> toItem = new SimpleChartItem<Float>(0f,youngest);
-    NavigableSet<ChartItem<Float>> subset = transmitterQueue.subSet(fromItem, true, toItem, true);
-    
+    SimpleChartItem<Float> fromItem = new SimpleChartItem<Float>(0f, oldest);
+    SimpleChartItem<Float> toItem = new SimpleChartItem<Float>(0f, youngest);
+    NavigableSet<ChartItem<Float>> subset = transmitterQueue.subSet(fromItem,
+        true, toItem, true);
+
     LinkedList<ChartItem<Float>> returnedList = new LinkedList<ChartItem<Float>>();
     returnedList.addAll(subset);
     return returnedList;
@@ -432,10 +438,11 @@ public class DataCache2 implements Cloneable {
       return null;
     }
 
-    SimpleChartItem<Float> fromItem = new SimpleChartItem<Float>(0f,oldest);
-    SimpleChartItem<Float> toItem = new SimpleChartItem<Float>(0f,youngest);
-    NavigableSet<ChartItem<Float>> subset = transmitterQueue.subSet(fromItem, true, toItem, true);
-    
+    SimpleChartItem<Float> fromItem = new SimpleChartItem<Float>(0f, oldest);
+    SimpleChartItem<Float> toItem = new SimpleChartItem<Float>(0f, youngest);
+    NavigableSet<ChartItem<Float>> subset = transmitterQueue.subSet(fromItem,
+        true, toItem, true);
+
     LinkedList<ChartItem<Float>> returnedList = new LinkedList<ChartItem<Float>>();
     returnedList.addAll(subset);
     return returnedList;
@@ -671,9 +678,8 @@ public class DataCache2 implements Cloneable {
         desiredOrJustBefore);
     NavigableSet<ChartItem<Float>> itemsBefore = transmitterSamples.headSet(
         searchItem, true);
-    
+
     float theValue = Float.NaN;
-    
 
     // From oldest to newest
     for (Iterator<ChartItem<Float>> iter = itemsBefore.iterator(); iter
@@ -700,8 +706,9 @@ public class DataCache2 implements Cloneable {
    * @return a list of {@link SignalToDistanceItem} objects containing the
    *         cached signal-to-distance cata for the receiver.
    */
-  public List<SignalToDistanceItem> getSignalToDistance(final String receiverId) {
-    Deque<SignalToDistanceItem> signalToDistanceItems = this.sigToDistHistory
+  public List<SignalToDistanceItem> getSignalToDistance(
+      final String receiverId, final long oldest, final long youngest) {
+    NavigableSet<SignalToDistanceItem> signalToDistanceItems = this.sigToDistHistory
         .get(receiverId);
 
     if (signalToDistanceItems == null) {
@@ -709,9 +716,14 @@ public class DataCache2 implements Cloneable {
     }
 
     LinkedList<SignalToDistanceItem> itemList = new LinkedList<SignalToDistanceItem>();
-    for (SignalToDistanceItem item : signalToDistanceItems) {
-      itemList.add(item);
-    }
+    SignalToDistanceItem oldItem = new SignalToDistanceItem(receiverId,
+        receiverId, 0f, 0f, oldest);
+    SignalToDistanceItem youngItem = new SignalToDistanceItem(receiverId,
+        receiverId, 0f, 0f, youngest);
+    NavigableSet subset = signalToDistanceItems.subSet(oldItem, true,
+        youngItem, true);
+
+    itemList.addAll(subset);
     return itemList;
   }
 
@@ -786,7 +798,8 @@ public class DataCache2 implements Cloneable {
     this.varianceRssiByRByT.clear();
 
     for (String rxer : this.sigToDistHistory.keySet()) {
-      Deque<SignalToDistanceItem> deque = this.sigToDistHistory.get(rxer);
+      NavigableSet<SignalToDistanceItem> deque = this.sigToDistHistory
+          .get(rxer);
       if (deque == null) {
         continue;
       }
@@ -853,9 +866,9 @@ public class DataCache2 implements Cloneable {
     }
 
     for (String receiver : this.sigToDistHistory.keySet()) {
-      Deque<SignalToDistanceItem> receiverSigToDist = this.sigToDistHistory
+      NavigableSet<SignalToDistanceItem> receiverSigToDist = this.sigToDistHistory
           .get(receiver);
-      LinkedBlockingDeque<SignalToDistanceItem> cloneReceiverSigToDist = new LinkedBlockingDeque<SignalToDistanceItem>();
+      NavigableSet<SignalToDistanceItem> cloneReceiverSigToDist = new ConcurrentSkipListSet<SignalToDistanceItem>();
       cloneReceiverSigToDist.addAll(receiverSigToDist);
       clone.sigToDistHistory.put(receiver, cloneReceiverSigToDist);
     }
@@ -869,7 +882,8 @@ public class DataCache2 implements Cloneable {
       for (String transmitter : receiverQueues.keySet()) {
         NavigableSet<ChartItem<Float>> transmitterQueue = receiverQueues
             .get(transmitter);
-        NavigableSet<ChartItem<Float>> cloneTransmitterQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(false));
+        NavigableSet<ChartItem<Float>> cloneTransmitterQueue = new ConcurrentSkipListSet<ChartItem<Float>>(
+            new ChartItemTimeComparator(false));
         cloneReceiverQueues.put(transmitter, cloneTransmitterQueue);
         cloneTransmitterQueue.addAll(transmitterQueue);
         cloneNumRssi += cloneTransmitterQueue.size();
@@ -884,7 +898,8 @@ public class DataCache2 implements Cloneable {
       for (String transmitter : receiverQueues.keySet()) {
         NavigableSet<ChartItem<Float>> transmitterQueue = receiverQueues
             .get(transmitter);
-        NavigableSet<ChartItem<Float>> cloneTransmitterQueue = new ConcurrentSkipListSet<ChartItem<Float>>(new ChartItemTimeComparator(false));
+        NavigableSet<ChartItem<Float>> cloneTransmitterQueue = new ConcurrentSkipListSet<ChartItem<Float>>(
+            new ChartItemTimeComparator(false));
         cloneReceiverQueues.put(transmitter, cloneTransmitterQueue);
         cloneTransmitterQueue.addAll(transmitterQueue);
         cloneNumVar += cloneTransmitterQueue.size();
@@ -961,10 +976,11 @@ public class DataCache2 implements Cloneable {
       }
     }
 
-    for (Deque<SignalToDistanceItem> sigItems : this.sigToDistHistory.values()) {
+    for (NavigableSet<SignalToDistanceItem> sigItems : this.sigToDistHistory
+        .values()) {
       while (!sigItems.isEmpty()
-          && sigItems.peek().getCreationTime() < oldestTs) {
-        sigItems.poll();
+          && sigItems.first().getCreationTime() < oldestTs) {
+        sigItems.pollFirst();
         --this.numSigToDistPoints;
       }
     }
@@ -1216,7 +1232,7 @@ public class DataCache2 implements Cloneable {
     // List<SignalToDistanceItem>>();
 
     for (String rxer : rxers) {
-      Deque<SignalToDistanceItem> cacheDeque = DataCache2.this.sigToDistHistory
+      NavigableSet<SignalToDistanceItem> cacheDeque = DataCache2.this.sigToDistHistory
           .get(rxer);
       out.writeObject(rxer);
       if (cacheDeque != null) {
@@ -1345,7 +1361,7 @@ public class DataCache2 implements Cloneable {
     for (int i = 0; i < numRxers; ++i) {
 
       String rxer = (String) in.readObject();
-      Deque<SignalToDistanceItem> deque = (Deque<SignalToDistanceItem>) in
+      NavigableSet<SignalToDistanceItem> deque = (NavigableSet<SignalToDistanceItem>) in
           .readObject();
       this.numSigToDistPoints += deque.size();
       this.sigToDistHistory.put(rxer, deque);

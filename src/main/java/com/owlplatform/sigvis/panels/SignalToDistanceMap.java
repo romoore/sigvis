@@ -65,8 +65,6 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
 
   protected long maxAge = 3000;
 
-  protected long maxVarianceAge = 3000;
-
   public long getMaxAge() {
     return maxAge;
   }
@@ -332,16 +330,20 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
 
   /**
    * 
-   * @param receiverId
-   * @param signal
-   * @param signalDelta
    * @return a Pair<Float,Float> that contains the min distance in value1 and
    *         the max distance in value2
    */
   protected Pair<Float, Float> getDistanceRange(final String receiverId,
       final String excludedId, final float signal, final float signalDelta) {
+    
+    long youngestTime = System.currentTimeMillis() - this.timeOffset;
+    
+    if(this.cache.isClone()){
+      youngestTime = this.cache.getCreationTs() - this.timeOffset;
+    }
+    long oldestTime = youngestTime - this.maxAge;
     List<SignalToDistanceItem> receiverSigToDist = this.cache
-        .getSignalToDistance(receiverId);
+        .getSignalToDistance(receiverId,oldestTime,youngestTime);
 
     if (receiverSigToDist == null) {
       log.warn("No signal-to-distance data for {}", receiverId);
@@ -350,10 +352,6 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
 
     log.debug("Searching for RSSI: {}", signal);
 
-    long oldestTime = System.currentTimeMillis() - this.timeOffset - this.maxAge;
-    if(this.cache.isClone()){
-      oldestTime = this.cache.getCreationTs() - this.timeOffset - this.maxAge;
-    }
 
     LinkedList<SignalToDistanceItem> points = new LinkedList<SignalToDistanceItem>();
 
@@ -372,6 +370,7 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
       // Skip this object in guessing the distance. It's too easy.
       if (currItem.getRxer().equals(excludedId)
           || currItem.getTxer().equals(excludedId)) {
+        
         iter.remove();
         continue;
       }
@@ -384,11 +383,13 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
       }
 
     }
+    
+    
 
     SignalToDistanceItem maxDistanceItem = null;
     SignalToDistanceItem minDistanceItem = null;
     // No points found in range, so search for "Next" values
-    if (points.size() == 0) {
+    if (points.isEmpty()) {
       SignalToDistanceItem tempMinRssi = new SignalToDistanceItem("", "",
           10000f, -100f);
       SignalToDistanceItem tempMaxRssi = new SignalToDistanceItem("", "", 0f,
@@ -482,14 +483,6 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
 
   public void setMinFps(float minFps) {
     this.minFps = minFps;
-  }
-
-  public long getMaxVarianceAge() {
-    return maxVarianceAge;
-  }
-
-  public void setMaxVarianceAge(long maxVarianceAge) {
-    this.maxVarianceAge = maxVarianceAge;
   }
 
   public void setDisplayLegend(final boolean displayLegend) {
