@@ -25,6 +25,14 @@ with this software as the file LICENSE.  If not, you may download a copy from
   support or help, please visit the project website at the URL listed above.
 
 == Compiling ==
+  Before you compile SigVis for the first time, be sure to install the
+  JAR files located in the "contrib" directory.  These are dependencies of the
+  project, but must be manually installed to your local Maven repository since
+  they are not tracked in any of the central repositories.  To install them,
+  you can simply run the provided Bash script:
+
+    ./install-lib.sh
+
   SigVis should be compiled using the Apache Maven project management tool.
   The project is currently compatible with Apache Maven version 3, which
   can be downloaded for free at <http://maven.apache.org/>.  To build the
