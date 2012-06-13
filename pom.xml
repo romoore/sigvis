@@ -194,14 +194,14 @@
 		</dependency>
 		<dependency>
 			<groupId>com.owlplatform</groupId>
-			<artifactId>libworldmodel</artifactId>
-			<version>1.0.0</version>
+			<artifactId>owl-worldmodel</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>com.owlplatform</groupId>
-			<artifactId>libsolver</artifactId>
-			<version>1.0.0</version>
+			<artifactId>owl-solver</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -218,14 +218,6 @@
     </dependency>
 	</dependencies>
 
-	<url>https://github.com/OwlPlatform/sigvis</url>
-	<organization>
-		<name>Owl Platform</name>
-		<url>https://github.com/OwlPlatform</url>
-	</organization>
-	<issueManagement>
-		<system>GitHub Issue Tracker</system>
-		<url>https://github.com/OwlPlatform/sigvis/issues</url>
-	</issueManagement>
+	<url>http://www.owlplatform.com</url>
 	<description>A Java/Swing-based GUI that allows users and developers of the Owl Platform to visualize and analyze device signal data in real-time or from saved files.</description>
 </project>
