@@ -35,7 +35,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,12 +56,12 @@ public class SignalVisualizer {
       + "SigVis comes with ABSOLUTELY NO WARRANTY.<br />"
       + "This is free software, and you are welcome to redistribute it<br />"
       + "under certain conditions; see the included file LICENSE for details.</p>"
-      + "<p style=\"font:small;\">SigVis makes use of the following external libraries:</p>" +
-      "<ul style=\"font:small;\">" +
-      "<li>\"Delaunay\" Copyright &copy; 2005, 2007 by Paul Chew <br />http://www.cs.cornell.edu/home/chew/Delaunay.html</li>" +
-      "<li>\"Compgeom\" Copyright &copy; 2010 by Bart Kiers <br />http://big-o.nl/apps/compgeom/</li>" +
-      "</ul>" +
-      "<p style=\"font: small;\">Please see the included LICENSE and README files<br />for full copyright details.</p>";
+      + "<p style=\"font:small;\">SigVis makes use of the following external libraries:</p>"
+      + "<ul style=\"font:small;\">"
+      + "<li>\"Delaunay\" Copyright &copy; 2005, 2007 by Paul Chew <br />http://www.cs.cornell.edu/home/chew/Delaunay.html</li>"
+      + "<li>\"Compgeom\" Copyright &copy; 2010 by Bart Kiers <br />http://big-o.nl/apps/compgeom/</li>"
+      + "</ul>"
+      + "<p style=\"font: small;\">Please see the included LICENSE and README files<br />for full copyright details.</p>";
 
   public static final String ABOUT_TXT = TITLE
       + " version "
@@ -72,11 +71,11 @@ public class SignalVisualizer {
       + "Copyright (C) 2012 Robert Moore and the Owl Platform\n"
       + "SigVis comes with ABSOLUTELY NO WARRANTY.\n"
       + "This is free software, and you are welcome to redistribute it\n"
-      + "under certain conditions; see the included file LICENSE for details.\n" +
-      "SigVis makes use of the following external libraries:\n" +
-      "* \"Delaunay\" Copyright (C) 2005, 2007 by Paul Chew (http://www.cs.cornell.edu/home/chew/Delaunay.html)\n" +
-      "* \"Compgeom\" Copyright (C) 2010 by Bart Kiers (http://big-o.nl/apps/compgeom/)\n" +
-      "Please see the included LICENSE and README files for full copyright details.\n";
+      + "under certain conditions; see the included file LICENSE for details.\n"
+      + "SigVis makes use of the following external libraries:\n"
+      + "* \"Delaunay\" Copyright (C) 2005, 2007 by Paul Chew (http://www.cs.cornell.edu/home/chew/Delaunay.html)\n"
+      + "* \"Compgeom\" Copyright (C) 2010 by Bart Kiers (http://big-o.nl/apps/compgeom/)\n"
+      + "Please see the included LICENSE and README files for full copyright details.\n";
 
   public static final Logger log = LoggerFactory
       .getLogger(SignalVisualizer.class);
@@ -112,10 +111,10 @@ public class SignalVisualizer {
     }
 
     GraphicsSettings gfx = new GraphicsSettings();
-    if("true".equalsIgnoreCase(System.getProperty("sun.java2d.opengl"))){
+    if ("true".equalsIgnoreCase(System.getProperty("sun.java2d.opengl"))) {
       gfx.setUseTransparency(true);
     }
-    SimpleFrame initialFrame = new SimpleFrame("SigVis v1.0.0-BETA", cache,gfx);
+    SimpleFrame initialFrame = new SimpleFrame("SigVis v1.0.0-BETA", cache, gfx);
     initialFrame.configureDisplay();
     if (wmHost != null) {
       if (handler.connectAsClient()) {
