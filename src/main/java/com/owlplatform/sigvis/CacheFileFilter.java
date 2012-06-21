@@ -23,9 +23,20 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
+/**
+ * A file filter for Sigvis cache files. The extension is ".svch".
+ * @author Robert Moore
+ *
+ */
 public class CacheFileFilter extends FileFilter {
 
+  /**
+   * Expected file extension.
+   */
   public static final String EXTENSION = ".svch";
+  /**
+   * File type description.
+   */
   private static final String DESCRIPTION = "SigVis Cache Files";
   
   @Override

@@ -65,16 +65,16 @@ import com.owlplatform.sigvis.panels.VoronoiHeatMap;
 import com.owlplatform.sigvis.structs.MutableListModel;
 import com.owlplatform.solver.SolverAggregatorInterface;
 import com.owlplatform.solver.listeners.SampleListener;
+import com.owlplatform.worldmodel.Attribute;
 import com.owlplatform.worldmodel.client.ClientWorldModelInterface;
 import com.owlplatform.worldmodel.client.listeners.DataListener;
 import com.owlplatform.worldmodel.client.protocol.messages.AbstractRequestMessage;
-import com.owlplatform.worldmodel.client.protocol.messages.Attribute;
 import com.owlplatform.worldmodel.client.protocol.messages.AttributeAliasMessage;
 import com.owlplatform.worldmodel.client.protocol.messages.DataResponseMessage;
 import com.owlplatform.worldmodel.client.protocol.messages.OriginAliasMessage;
 import com.owlplatform.worldmodel.client.protocol.messages.OriginPreferenceMessage;
 import com.owlplatform.worldmodel.client.protocol.messages.SnapshotRequestMessage;
-import com.owlplatform.worldmodel.client.protocol.messages.URISearchResponseMessage;
+import com.owlplatform.worldmodel.client.protocol.messages.IdSearchResponseMessage;
 import com.owlplatform.worldmodel.types.DataConverter;
 
 public class TransmitterDetailsPanel extends JPanel implements SampleListener,
@@ -171,10 +171,10 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 
 		this.solver.addSampleListener(this);
 		this.worldServer.addDataListener(this);
-
-		this.worldServer.registerSearchRequest("*.transmitter.*");
-		this.worldServer.registerSearchRequest("*.receiver.*");
-		this.worldServer.registerSearchRequest("winlab");
+		// TODO: React to cache instead
+//		this.worldServer.registerSearchRequest("*.transmitter.*");
+//		this.worldServer.registerSearchRequest("*.receiver.*");
+//		this.worldServer.registerSearchRequest("winlab");
 
 
 		try {
@@ -521,17 +521,17 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 	@Override
 	public void dataResponseReceived(ClientWorldModelInterface worldModel,
 			DataResponseMessage message) {
-		if (message.getUri().equals("winlab")) {
+		if (message.getId().equals("winlab")) {
 			double width = -1f;
 			double height = -1f;
 			String mapURL = null;
 			for (Attribute field : message.getAttributes()) {
 				if ("width".equals(field.getAttributeName())) {
-					width = (Double)DataConverter.decodeUri(field.getAttributeName(),field.getData());
+					width = (Double)DataConverter.decode(field.getAttributeName(),field.getData());
 				} else if ("height".equals(field.getAttributeName())) {
-					height = (Double) DataConverter.decodeUri(field.getAttributeName(), field.getData());
+					height = (Double) DataConverter.decode(field.getAttributeName(), field.getData());
 				} else if ("map url".equals(field.getAttributeName())) {
-					mapURL = (String) DataConverter.decodeUri(field.getAttributeName(),field.getData());
+					mapURL = (String) DataConverter.decode(field.getAttributeName(),field.getData());
 					continue;
 				}
 			}
@@ -541,12 +541,12 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 			}
 			this.setRegionImageUri(mapURL);
 
-		} else if (message.getUri().startsWith(
+		} else if (message.getId().startsWith(
 				"pipsqueak.receiver")) {
-			byte[] pipId = makeIdFromPipString(message.getUri());
+			byte[] pipId = makeIdFromPipString(message.getId());
 			if (pipId == null) {
 				log.debug("Null receiver id for {}", message
-						.getUri());
+						.getId());
 				return;
 			}
 			double x = -1;
@@ -554,9 +554,9 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 
 			for (Attribute field : message.getAttributes()) {
 				if ("location.x".equals(field.getAttributeName())) {
-					x = (Double) DataConverter.decodeUri(field.getAttributeName(), field.getData());
+					x = (Double) DataConverter.decode(field.getAttributeName(), field.getData());
 				} else if ("location.y".equals(field.getAttributeName())) {
-					y = (Double) DataConverter.decodeUri(field.getAttributeName(), field.getData());
+					y = (Double) DataConverter.decode(field.getAttributeName(), field.getData());
 				}
 			}
 			if (x > 0 && y > 0) {
@@ -564,12 +564,12 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 				this.receiverLocations.put(receiverHash, new Point2D.Float(
 						(float) x, (float) y));
 			}
-		} else if (message.getUri().startsWith(
+		} else if (message.getId().startsWith(
 				"pipsqueak.transmitter")) {
-			byte[] pipId = makeIdFromPipString(message.getUri());
+			byte[] pipId = makeIdFromPipString(message.getId());
 			if (pipId == null) {
 				log.debug("Null transmitter id for {}", message
-						.getUri());
+						.getId());
 				return;
 			}
 			double x = -1;
@@ -581,9 +581,9 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 
 			for (Attribute field : message.getAttributes()) {
 				if ("location.x".equals(field.getAttributeName())) {
-					x = (Double) DataConverter.decodeUri(field.getAttributeName(), field.getData());
+					x = (Double) DataConverter.decode(field.getAttributeName(), field.getData());
 				} else if ("location.y".equals(field.getAttributeName())) {
-					y = (Double) DataConverter.decodeUri(field.getAttributeName(), field.getData());
+					y = (Double) DataConverter.decode(field.getAttributeName(), field.getData());
 				}
 			}
 			if (x > 0 && y > 0) {
@@ -594,17 +594,17 @@ public class TransmitterDetailsPanel extends JPanel implements SampleListener,
 	}
 
 	@Override
-	public void uriSearchResponseReceived(ClientWorldModelInterface worldModel,
-			URISearchResponseMessage message) {
-		if (message.getMatchingUris() == null) {
+	public void idSearchResponseReceived(ClientWorldModelInterface worldModel,
+			IdSearchResponseMessage message) {
+		if (message.getMatchingIds() == null) {
 			return;
 		}
-		for (String uri : message.getMatchingUris()) {
+		for (String uri : message.getMatchingIds()) {
 			SnapshotRequestMessage request = new SnapshotRequestMessage();
 			request.setBeginTimestamp(0l);
 			request.setEndTimestamp(System.currentTimeMillis());
-			request.setQueryURI(uri);
-			request.setQueryAttributes(new String[] { "*" });
+			request.setIdRegex(uri);
+			request.setAttributeRegexes(new String[] { "*" });
 
 			this.worldServer.sendMessage(request);
 		}

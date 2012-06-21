@@ -44,11 +44,11 @@ import javax.swing.JProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.owlplatform.worldmodel.Attribute;
 import com.owlplatform.worldmodel.client.ClientWorldConnection;
 import com.owlplatform.worldmodel.client.Response;
 import com.owlplatform.worldmodel.client.StepResponse;
 import com.owlplatform.worldmodel.client.WorldState;
-import com.owlplatform.worldmodel.client.protocol.messages.Attribute;
 import com.owlplatform.worldmodel.types.ByteArrayConverter;
 import com.owlplatform.worldmodel.types.DataConverter;
 import com.owlplatform.worldmodel.types.DoubleConverter;
@@ -146,7 +146,7 @@ public class ConnectionHandler {
       return false;
     }
     log.info("Connecting to {}", this.wmc);
-    if (!this.wmc.connect()) {
+    if (!this.wmc.connect(0)) {
       log.error("Unable to connect. See log for details.");
       return false;
     }
@@ -329,7 +329,7 @@ public class ConnectionHandler {
 
     // Set-up the initial data from the world model
     this.cache.setRegionUri(this.region);
-    String[] matchingUris = this.wmc.searchURI("region\\." + this.region);
+    String[] matchingUris = this.wmc.searchId("region\\." + this.region);
     this.retrieveRegionInfo(matchingUris);
     this.retrieveAnchors(this.region);
 
@@ -355,13 +355,13 @@ public class ConnectionHandler {
           Collection<Attribute> attributes = state.getState(stateUri);
           for (Attribute attrib : attributes) {
             if ("location.maxx".equals(attrib.getAttributeName())) {
-              width = ((Double) DataConverter.decodeUri(
+              width = ((Double) DataConverter.decode(
                   attrib.getAttributeName(), attrib.getData())).doubleValue();
             } else if ("location.maxy".equals(attrib.getAttributeName())) {
-              height = ((Double) DataConverter.decodeUri(
+              height = ((Double) DataConverter.decode(
                   attrib.getAttributeName(), attrib.getData())).doubleValue();
             } else if ("image.url".equals(attrib.getAttributeName())) {
-              imageUrlString = (String) DataConverter.decodeUri(
+              imageUrlString = (String) DataConverter.decode(
                   attrib.getAttributeName(), attrib.getData());
             }
           }
@@ -428,10 +428,10 @@ public class ConnectionHandler {
           Collection<Attribute> attribs = state.getState(uri);
           for (Attribute att : attribs) {
             if ("location.xoffset".equals(att.getAttributeName())) {
-              x = ((Double) DataConverter.decodeUri(att.getAttributeName(),
+              x = ((Double) DataConverter.decode(att.getAttributeName(),
                   att.getData())).doubleValue();
             } else if ("location.yoffset".equals(att.getAttributeName())) {
-              y = ((Double) DataConverter.decodeUri(att.getAttributeName(),
+              y = ((Double) DataConverter.decode(att.getAttributeName(),
                   att.getData())).doubleValue();
             } else if (att.getAttributeName().startsWith("sensor")) {
               if (att.getAttributeName().equals("sensor.mim")) {
@@ -439,7 +439,7 @@ public class ConnectionHandler {
               }
               byte[] id = new byte[16];
               System.arraycopy(att.getData(), 1, id, 0, 16);
-              sensorString = ByteArrayConverter.CONVERTER.asString(id);
+              sensorString = ByteArrayConverter.get().asString(id);
               deviceId = new BigInteger(sensorString.substring(2), 16);
             }
           }
@@ -557,7 +557,7 @@ public class ConnectionHandler {
                 continue;
               }
               Attribute linkAvg = attribs.iterator().next();
-              double value = DoubleConverter.CONVERTER
+              double value = DoubleConverter.get()
                   .decode(linkAvg.getData());
               if (this.handler.cache != null) {
                 this.handler.cache.addRssi(rxerSensor, txerSensor,
@@ -620,7 +620,7 @@ public class ConnectionHandler {
                 continue;
               }
               Attribute linkAvg = attribs.iterator().next();
-              double value = DoubleConverter.CONVERTER
+              double value = DoubleConverter.get()
                   .decode(linkAvg.getData());
               if (this.handler.cache != null) {
                 this.handler.cache.addVariance(rxerSensor, txerSensor,
