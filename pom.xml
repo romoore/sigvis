@@ -125,7 +125,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.owlplatorm.sigvis.SignalVisualizer</mainClass>
+							<mainClass>com.owlplatorm.sigvis.SignalVisualizer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -140,7 +140,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.owlplatform.sigvis.SignalVisualizer</mainClass>
+							<mainClass>com.owlplatform.sigvis.SignalVisualizer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
