@@ -351,7 +351,7 @@ public class ConnectionHandler {
       String imageUrlString = null;
       try {
         WorldState state = res.get();
-        for (String stateUri : state.getURIs()) {
+        for (String stateUri : state.getIdentifiers()) {
           Collection<Attribute> attributes = state.getState(stateUri);
           for (Attribute attrib : attributes) {
             if ("location.maxx".equals(attrib.getAttributeName())) {
@@ -419,7 +419,7 @@ public class ConnectionHandler {
 
         success = true;
 
-        for (String uri : state.getURIs()) {
+        for (String uri : state.getIdentifiers()) {
 
           String sensorString = null;
           BigInteger deviceId = null;
@@ -546,7 +546,7 @@ public class ConnectionHandler {
             if (state == null) {
               break;
             }
-            for (String uri : state.getURIs()) {
+            for (String uri : state.getIdentifiers()) {
 
               int txSensStart = uri.indexOf('.');
               int rxSensStart = uri.lastIndexOf('.');
@@ -609,7 +609,7 @@ public class ConnectionHandler {
             if (state == null) {
               break;
             }
-            for (String uri : state.getURIs()) {
+            for (String uri : state.getIdentifiers()) {
 
               int txSensStart = uri.indexOf('.');
               int rxSensStart = uri.lastIndexOf('.');
