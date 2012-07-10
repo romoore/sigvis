@@ -1226,7 +1226,7 @@ public class DataCache2 implements Cloneable {
       }
     }
 
-    monitor.setNote("Saving Signal-to-Distance data...");
+    monitor.setNote("Saving signal-to-distance data...");
     // Signal to Distance values
     // Map<String, List<SignalToDistanceItem>> cloneMap = new HashMap<String,
     // List<SignalToDistanceItem>>();
