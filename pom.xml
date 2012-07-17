@@ -171,13 +171,13 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.1</version>
+			<version>1.6.6</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.1</version>
+			<version>1.6.6</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -189,13 +189,13 @@
 		<dependency>
 			<groupId>com.owlplatform</groupId>
 			<artifactId>owl-worldmodel</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>com.owlplatform</groupId>
 			<artifactId>owl-solver</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.1</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
