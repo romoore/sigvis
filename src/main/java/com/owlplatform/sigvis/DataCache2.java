@@ -46,7 +46,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.LinkedBlockingDeque;
+//import java.util.concurrent.LinkedBlockingDeque;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -1247,7 +1247,7 @@ public class DataCache2 implements Cloneable {
       }
       // Place holder
       else {
-        out.writeObject(new LinkedBlockingDeque<SignalToDistanceItem>());
+        out.writeObject(new ConcurrentSkipListSet<SignalToDistanceItem>());
       }
     }
     monitor.setNote("Writing to file...");
