@@ -33,7 +33,22 @@
 
 <h1>What it Does</h1>
 
-<p>SigVis is a set of visualization tools for monitoring or exploring wireless sensor networks, particularly the received signal strength indicator (RSSI) values reported by wireless cards.  This data is available for nearly every wireless technology, most commonly by IEEE 802.11 (WiFi) family of protocols.  By visualizing the data in both time and space, new observations and insights are made possible.  Let's take a look at the different visualizations.</p>
+<p>SigVis is a set of visualization tools for monitoring or exploring wireless
+sensor networks, particularly the received signal strength indicator (RSSI)
+values reported by wireless cards.  This data is available for nearly every
+wireless technology, most commonly by IEEE 802.11 (WiFi) family of protocols.
+By visualizing the data in both time and space, new observations and insights
+are made possible.  Let's take a look at the different visualizations.</p>
+
+<p>If you feel like trying out the app, but don't have access to an Owl
+Platform installation, I've provided a <a
+href="data/sigvis-winlab-demo.svch">sample file</a> for you to view.  It
+contains data collected from the WINLAB laboratory (where a lot of work
+related to the Owl Platform takes place) on October 21, 2012.  There isn't a
+lot going on, but it can give you an idea of what SigVis does.  The
+screenshots below all use the same data file, with the time set to 9:01:02pm
+(the last timestamp).</p>
+
 
 <h2>RSSI Bar Chart</h2>
 <p>A set of simple bar charts are used to display RSSI values or RSSI variance
@@ -43,20 +58,91 @@ some "empty" spaces.
 </p>
 <table>
   <tr>
-    <td><a href="images/rssi-bar.png"><img src="images/rssi-bar.png"
-    alt="RSSI Bar Chart for Transmitter 38" title="RSSI Bar Chart for
-    Transmitter 38" /></a></td>
+    <td>
+      <div class="screenshot"><a href="images/rssi-bar.png"><img src="images/rssi-bar.png"
+      alt="RSSI Bar Chart for Transmitter 38" title="RSSI Bar Chart for
+      Transmitter 38" /></a></div>
+      <div class="caption"><p>A bar chart showing the current RSSI value for
+      Transmitter 38 as observed by different receivers.  The receiver names (as
+      defined in the World Model) are written vertically on the blue RSSI
+      bars.</p>
+      </div>
+    </td>
   </tr>
   <tr>
-    <td><a href="images/variance-bar.png"><img src="images/variance-bar.png"
-    alt="RSSI Variance Bar Chart for Transmitter 38" title="RSSI Variance Bar Chart for
-    Transmitter 38" /></a></td>
+    <td>
+      <div class="screenshot"><a href="images/variance-bar.png"><img src="images/variance-bar.png"
+      alt="RSSI Variance Bar Chart for Transmitter 38" title="RSSI Variance Bar Chart for
+      Transmitter 38" /></a></div>
+      <div class="caption"><p>A bar chart showing the current RSSI variance
+      for Transmitter 38 as observed by various receivers.</p>
+      </div>
+    </td>
   </tr>
 </table>
 
 <h2>RSSI Line Graph</h2>
+<p>A set of line graphs showing values over time.  Depending on the data, the
+graphs will auto-scale th vertical axis, and scaling on the horizontal axis is
+performed by using the mouse wheel.  The most recent values are on the right,
+with older values drawn to the left.</p> 
+<p> When connected to a live World Model data stream, the values will
+auto-scroll from right to left. Scrolling is stopped and started by
+left-clicking anywhere on the graph.</p>
+<table>
+  <tr>
+    <td>
+      <div class="screenshot"><a href="images/tx-rssi-lines.png"><img
+      src="images/tx-rssi-lines.png" alt="RSSI Line Graph for Transmitter 38"
+      title="RSSI Line Graph for Transmitter 38" /></a></div>
+      <div class="caption"><p>A line graph showing the last 60 seconds of RSSI
+      values for Transmitter 38 from various receivers. Receivers are
+      color-coded using a legend at the top of the graph.</p></div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="screenshot"><a href="images/tx-var-lines.png"><img
+      src="images/tx-var-lines.png" alt="RSSI Variance Line Graph for
+      Transmitter 38" title="RSSI Variance Line Graph for Transmitter 38"
+      /></a></div>
+      <div class="caption"><p>A line graph showing the last 60 seconds of RSSI
+      variance values for Transmitter 38. The "spike" from Receiver 652
+      indicates that either the receiver was moving (unlikely) or someone was
+      moving nearby the receiver.</p></div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="screenshot"><a href="images/tx-combo-lines.png"><img
+      src="images/tx-combo-lines.png" alt="Combined RSSI and Variance Line
+      Graph for Transmitter 38" title="Combined RSSI and Variance Line Graph
+      for Transmitter 38" /></a></div>
+      <div class="caption"><p>A line graph showing combined RSSI and standard
+      deviation in the same plot.  The "thick" areas are centered at the
+      current RSSI and above and below to one standard deviation.</p></div>
+    </td>
+  </tr>
+</table>
 
 <h2>RSSI Stripes</h2>
+<p>A somewhat different graph from the RSSI lines above, this one displays the
+RSSI value for each transmitter/receiver pair over a period of time.  To
+provide a simple, if imprecise, measure of the RSSI value, the color of each
+line ranges from red (low) to blue (high) to provide an intuition about the
+RSSI value.</p>
+
+<p>Clustered based on receivers, this graph can be used to spot problematic
+receivers or transmitters by identifying a block of reddish lines, or a red
+line in the same relative position for each receiver.  It can also be used to
+quickly get an idea of how much data has been sent through the system over the
+last few minutes</p>
+
+<table>
+  <tr>
+    <td>
+  </tr>
+</table>
 
 <h2>RSSI Line Maps</h2>
 
