@@ -129,8 +129,9 @@ left-clicking anywhere on the graph.</p>
 <p>A somewhat different graph from the RSSI lines above, this one displays the
 RSSI value for each transmitter/receiver pair over a period of time.  To
 provide a simple, if imprecise, measure of the RSSI value, the color of each
-line ranges from red (low) to blue (high) to provide an intuition about the
-RSSI value.</p>
+line ranges from red (low) to green (medium) to pink (high) to provide an intuition about the
+RSSI value. When displaying RSSI Variance instead of RSSI, the same colors are
+used to display the variance value, varying from 0 to 40+.</p>
 
 <p>Clustered based on receivers, this graph can be used to spot problematic
 receivers or transmitters by identifying a block of reddish lines, or a red
@@ -140,7 +141,25 @@ last few minutes</p>
 
 <table>
   <tr>
-    <td>
+    <td><div class="screenshot"><a href="images/all-rssi-stripes.png"><img
+      src="images/all-rssi-stripes.png" alt="RSSI Stripes for all
+      transmitter-receiver pairs" title="RSSI Stripes for all
+      transmitter-receiver pairs" /></a></div>
+      <div class="caption"><p>RSSI stripes plot showing RSSI values for the last
+      60 seconds for all transmitter-receiver pairs.  Reddish colors indicate
+      low RSSI values and bluish colors indicate high RSSI values.</p></div>
+    </td>
+  </tr>
+  <tr>
+    <td><div class="screenshot"><a href="images/all-var-stripes.png"><img
+    src="images/all-var-stripes.png" alt="RSSI Variance Stripes for all
+    transmitter-receiver pairs" title="RSSI Variance Stripes for all
+    transmitter-receiver pairs"></a></div>
+    <div class="caption"><p>RSSI variance stripes plot showing values for the
+    last 60 seconds for all transmitter-receiver pairs.  The cluster of
+    blue-pink colors across multiple receivers, but around the same point in
+    time, suggests motion was occurring within the building.</p></div>
+    </td>
   </tr>
 </table>
 
