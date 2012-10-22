@@ -261,8 +261,60 @@ blue is "high", and  pink is "highest".</p>
 </table>
 
 <h2>Signal-to-Distance Ring Maps</h2>
+<p>When enough transmitters and receivers are in known locations and not
+moving (perhaps attached to fixed objects), a rough estimate of
+signal-to-distance for the environment can be created.  For a transmitter, its
+current RSSI (signal) value is used to estimate its distance to all of the
+receivers.  Rings are drawn out from each receiver; the inner radius is the
+shortest predicted distance and the outer radius is the longest predicted
+distance.</p>
+
+<p>While these maps can be used for "eyeing" the location of an object, they
+also demonstrate just how hard it is to to perform indoor localization and
+tracking.  In general, weak links will mispredict the distance more often
+than short links.  Additionally, indoor environments are full of objects that
+cause complex multi-path scenarios.</p>
+
+<table>
+  <tr>
+    <td><div class="screenshot"><a href="images/tx-rssi-rings.png"><img
+    src="images/tx-rssi-rings.png" alt="RSSI Ring Map for Transmitter 38."
+    title="RSSI Ring Map for Transmitter 38" /></a></div>
+    <div class="caption"><p>RSSI ring map for transmitter 38.  The rings are
+    centered around receivers that can receive 38's beacons.  Note how many of
+    the receivers completely mispredict the distance to 38; an effect caused
+    by multiple paths traveled by the radio waves.</p></div>
+    </td>
+  </tr>
+</table>
 
 <h2>Ambient Motion</h2>
+<p>The ambient motion visualization uses RSSI variance information to estimate
+how much motion is occurring in the environment.  Each time the variance
+exceeds a set threshold level (2-3), a "cloud" is drawn on the screen.  When
+multiple receivers experience this increase in variance, more clouds are
+drawn.  This is not intended to be a precise tool, but rather to allow users
+to quickly intuit how busy the area is without having to read complex
+graphs.</p>
+
+<table>
+  <tr>
+    <td>
+      <div class="screenshot"><a href="images/ambient-night.png"><img
+      src="images/ambient-night.png" alt="Ambient motion during an evening
+      when 1 person is walking around" title="Ambient motion during an evening
+      when 1 person is walking around" /></a></div>
+      <div class="caption"><p>Ambient motion for a relatively quiet evening at
+      WINLAB.  The screen is darkened to give the impression of nighttime, and
+      a few clouds pass across the screen.  In this case, a single person was
+      moving around for several seconds.  The tail-end of this motion is
+      visible near the left side of the screen. The few other clouds are
+      likely from "left over" motion or the person settling in their seat.</p></div>
+    </td>
+  </tr>
+</table>
+
+
       </section>
     </div>
     <footer>

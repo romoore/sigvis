@@ -354,3 +354,8 @@ footer p + p {
     content: 'at http://github.com/';
   }
 }
+
+.caption p {
+  font-size: small;
+  color: black;
+}
