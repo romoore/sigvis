@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.owlplatform</groupId>
 	<artifactId>sigvis</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Owl Platform Signal Visualization tools</name>
@@ -11,7 +11,7 @@
     <url>git@github.com:romoore/sigvis.git</url>
     <connection>scm:git:git@github.com:romoore/sigvis.git</connection>
     <developerConnection>scm:git:git@github.com:romoore/sigvis.git</developerConnection>
-    <tag>sigvis-1.0.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <developers>
