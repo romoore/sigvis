@@ -1,8 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.owlplatform</groupId>
 	<artifactId>sigvis</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Owl Platform Signal Visualization tools</name>
@@ -11,7 +12,6 @@
     <url>git@github.com:romoore/sigvis.git</url>
     <connection>scm:git:git@github.com:romoore/sigvis.git</connection>
     <developerConnection>scm:git:git@github.com:romoore/sigvis.git</developerConnection>
-    <tag>HEAD</tag>
   </scm>
 
   <developers>
@@ -24,13 +24,6 @@
       </roles>
     </developer>
   </developers>
-
-  <distributionManagement>
-    <repository>
-      <id>localhost</id>
-      <url>file:$(project.build.directory}/release/</url>
-    </repository>
-  </distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -93,11 +86,6 @@
 				<artifactId>wagon-ssh</artifactId>
 				<version>2.2</version>
 			</extension>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-file</artifactId>
-        <version>2.2</version>
-      </extension>
 		</extensions>
 		<plugins>
 			<plugin>
