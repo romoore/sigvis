@@ -40,7 +40,7 @@ public class ConnectionOptionsPanel extends JPanel {
 
 	public ConnectionOptionsPanel() {
 		super();
-		
+		this.worldModelPort.setText("7010");
 		this.setLayout(new GridLayout(3, 2));
 		
 		
