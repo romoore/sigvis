@@ -28,7 +28,7 @@
   <distributionManagement>
     <repository>
       <id>localhost</id>
-      <url>file:buid/</url>
+      <url>file:$(project.build.directory}/release/</url>
     </repository>
   </distributionManagement>
 
