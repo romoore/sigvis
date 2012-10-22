@@ -27,7 +27,7 @@
         </ul>
       </header>
       <section>
-        <h1>Signal Visualization (SigVis) for Owl Platform</h1>
+        <h1>Signal Visualization (SigVis) for the Owl Platform</h1>
 
 <p>This application is a simple Java-based graphical user interface (GUI) containing several simple visualizations of wireless sensor network signal data gathered via the Owl Platform.  Visualizing sensor signal data can assist in debugging sensor failures, analyzing the overall effectiveness of the system, and aid in designing new applications.</p>
 
@@ -164,8 +164,76 @@ last few minutes</p>
 </table>
 
 <h2>RSSI Line Maps</h2>
+<p>The "map" visualizations show wireless sensor data overlayed on an image
+map of the space.  The map can be configured into the World Model as a URL
+anywhere accessible to the application.  For these screenshots, we used the <a
+href="data/sigvis-winlab-demo.svch">example file</a>, which requires access to
+a Rutgers University web host in order to download the building image.</p>
+
+<p>This RSSI and variance line maps show the RSSI and RSSI variance data for
+each transmitter-receiver pair as a line drawn between the locations of the
+two devices.  The line is colored similarly to the "stripes" plots, where red
+indicates "low" values, green is "medium", and blue or pink is "high".</p>
+
+<table>
+  <tr>
+    <td><div class="screenshot"><a href="images/all-rssi-lines-map.png"><img
+    src="images/all-rssi-lines-map.png" alt="RSSI Line Map showing all
+    transmitter-receiver pairs" title="RSSI Line Map showing all
+    transmitter-receiver pairs" /></a></div>
+    <div class="caption"><p>An RSSI line map showing the WINLAB building with
+    transmitter-receiver pairings.  Red lines are weak RSSI values, and blue
+    or pink are very strong.</p></div>
+    </td>
+  </tr>
+  <tr>
+    <td><div class="screenshot"><a href="images/all-var-lines-map.png"><img
+    src="images/all-var-lines-map.png" alt="RSSI Variance Line Map showing all
+    transmitter-receiver pairs" title="RSSI Variance Line Map shwing all
+    transmitter-receiver pairs" /></a></div>
+    <div class="caption"><p>Variance line map showing all transmitter-receiver
+    pairs in the WINLAB building. The red lines are the lowest variance, and
+    blue or pink lines indicate high variance.  </p></div>
+    </td>
+  </tr>
+</table>
 
 <h2>Voronoi Signal Maps</h2>
+<p>By partitioning the physical layout of the area into a Voronoi diagram,
+with transmitters and/or receivers as vertices, a rough but intuitive
+estimate of signal levels throughout the area is possible. A Voronoi diagram
+is by no means an optimal representation of signal propagation
+characteristics, but it provides a simple way to view the area.  </p>
+
+<p>Within each "cell" of the diagram, the value displayed is directly related
+to the transmitter or receiver at the center of that cell. For example, in a
+full RSSI diagram (all transmitters and receivers), the color of a
+transmitter's cell might be the maximum RSSI value received FOR that
+transmitter BY a receiver.   In these maps, as with many others, the color
+codes indicate different signal levels: red is "weak", green is "moderate",
+blue is "high", and  pink is "highest".</p>
+
+<table>
+  <tr>
+    <td><div class="screenshot"><a href="images/tx-rssi-voronoi.png"><img
+      src="images/tx-rssi-voronoi.png" alt="Voronoi diagram showing RSSI values
+      for Transmitter 38" title="Voronoi diagram showing RSSI values for
+      Transmitter 38" /></a></div>
+      <div class="caption"><p>A Voronoi map showing the RSSI values received by
+      each receiver for Transmitter 38. Missing values indicate that data hasn't
+      been received within 5 seconds.</p></div>
+    </td>
+  </tr>
+  <tr>
+    <td><div class="screenshot"><a href="images/tx-var-voronoi.png"><img
+      src="images/tx-var-voronoi.png" alt="Voronoi diagram showing RSSI variance
+      values for Transmitter 38" title="Voronoi diagram showing RSSI vlaues for
+      Transmitter 38" /></a></div>
+      <div class="caption"><p>A Voronoi map showing the RSSI variance levels at
+      each receiver for Transmitter 38.</p></div>
+    </td>
+  </tr>
+</table>
 
 <h2>Signal-to-Distance Ring Maps</h2>
 
