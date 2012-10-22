@@ -1,6 +1,6 @@
                     Owl Platform Signal Visualization Tools
                                   Change Log
-Version 1.0.0
+Version 1.0.1-SNAPSHOT
 Last updated October 22, 2012
 
 Project Website: <https://github.com/OwlPlatform/sigvis>
@@ -19,6 +19,8 @@ with this software as the file LICENSE.  If not, you may download a copy from
   Platform/GRAIL Project in visualizing signal data from the system.  It
   focuses primarily on visualizing RSSI data from wireless transmitters and
   receivers in the system.
+
+Version 1.0.1 - TBD
 
 Version 1.0.0 - October 22, 2012
   + Initial version.
