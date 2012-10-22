@@ -1,7 +1,7 @@
                     Owl Platform Signal Visualization Tools
                                   Change Log
-Version 1.0.0-BETA
-Last updated June 8, 2012
+Version 1.0.0
+Last updated October 22, 2012
 
 Project Website: <https://github.com/OwlPlatform/sigvis>
 
@@ -20,7 +20,7 @@ with this software as the file LICENSE.  If not, you may download a copy from
   focuses primarily on visualizing RSSI data from wireless transmitters and
   receivers in the system.
 
-Version 1.0.0 - TBD
+Version 1.0.0 - October 22, 2012
   + Initial version.
   + Visualizations available:
     - Bar Charts (RSSI/Variance)
