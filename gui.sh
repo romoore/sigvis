@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Location of jar file for SigVis
-JAR_FILE="target/sigvis-1.0.0-SNAPSHOT-jar-with-dependencies.jar"
+JAR_FILE="target/sigvis-1.0.1-SNAPSHOT-jar-with-dependencies.jar"
 LAUNCH_CLASS="com.owlplatform.sigvis.SignalVisualizer"
 
 FLAG_GL="-Dsun.java2d.opengl=true"

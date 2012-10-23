@@ -1,2 +1,2 @@
 @echo off
-javaw.exe -jar target/sigvis-1.0.0-SNAPSHOT-jar-with-dependencies.jar %*
+javaw.exe -jar target/sigvis-1.0.1-SNAPSHOT-jar-with-dependencies.jar %*
