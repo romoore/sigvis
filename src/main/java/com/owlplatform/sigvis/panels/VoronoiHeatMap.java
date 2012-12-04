@@ -67,7 +67,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
 
   @Override
   public String getDisplayedId() {
-    return displayedId;
+    return this.displayedId;
   }
 
   @Override
@@ -105,7 +105,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
     super();
     this.cache = cache;
     this.type = type;
-    initialTriangle = new Triangle(new Pnt(-initialSize, -initialSize),
+    this.initialTriangle = new Triangle(new Pnt(-initialSize, -initialSize),
         new Pnt(initialSize, -initialSize), new Pnt(0, initialSize));
     ToolTipManager.sharedInstance().registerComponent(this);
     this.setToolTipText("plot");
@@ -217,7 +217,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
     }
 
     // Keep track of sites done; no drawing for initial triangles sites
-    HashSet<Pnt> done = new HashSet<Pnt>(initialTriangle);
+    HashSet<Pnt> done = new HashSet<Pnt>(this.initialTriangle);
     for (Triangle triangle : dt) {
       for (Pnt site : triangle) {
         if (done.contains(site))
@@ -442,7 +442,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
   }
 
   public float getMinValue() {
-    return minValue;
+    return this.minValue;
   }
 
   public void setMinValue(float minValue) {
@@ -450,7 +450,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
   }
 
   public float getMaxValue() {
-    return maxValue;
+    return this.maxValue;
   }
 
   public void setMaxValue(float maxValue) {
@@ -463,7 +463,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
 
   @Override
   public boolean isTransparency() {
-    return transparency;
+    return this.transparency;
   }
 
   @Override
@@ -477,7 +477,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
   }
 
   public float getMinFps() {
-    return minFps;
+    return this.minFps;
   }
 
   public void setMinFps(float minFps) {
@@ -485,7 +485,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
   }
 
   public long getMaxAge() {
-    return maxAge;
+    return this.maxAge;
   }
 
   public void setMaxAge(long maxAge) {
@@ -493,7 +493,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
   }
 
   public boolean isDeviceTransmitter() {
-    return deviceIsTransmitter;
+    return this.deviceIsTransmitter;
   }
 
   public void setDeviceIsTransmitter(boolean deviceIsTransmitter) {
@@ -541,6 +541,30 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
 
     double rX = mX * xS2R;
     double rY = mY * yS2R;
+    
+    float minCombined = Float.MAX_VALUE;
+    String minDevice = null;
+    
+    for(String rxer : this.cache.getReceiverIds()){
+      Point2D location = this.cache.getDeviceLocation(rxer);
+      float dist = (float)(Math.abs(location.getX()-rX) + Math.abs(location.getY()-rY));
+      if(dist < 10 && dist < minCombined){
+        minCombined = dist;
+        minDevice = rxer;
+      }
+    }
+    
+    for(String txer : this.cache.getFiduciaryTransmitterIds()){
+      Point2D location = this.cache.getDeviceLocation(txer);
+      float dist = (float)(Math.abs(location.getX()-rX) + Math.abs(location.getY()-rY));
+      if(dist < 10 && dist < minCombined){
+        minCombined = dist;
+        minDevice = txer;
+      }
+    }
+    if(minDevice != null){
+      return minDevice;
+    }
 
     return this.cache.getRegionUri() + String.format(" (%.1f, %.1f)", rX, rY);
   }
@@ -562,7 +586,7 @@ public class VoronoiHeatMap extends JComponent implements DisplayPanel {
   }
 
   public long getTimeOffset() {
-    return timeOffset;
+    return this.timeOffset;
   }
 
   public void setTimeOffset(long timeOffset) {

@@ -19,28 +19,8 @@
 
 package com.owlplatform.sigvis;
 
-import java.awt.MediaTracker;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-
-import javax.imageio.ImageIO;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.owlplatform.worldmodel.types.ByteArrayConverter;
-import com.owlplatform.worldmodel.types.DataConverter;
-import com.owlplatform.worldmodel.types.DoubleConverter;
 
 public class SignalVisualizer {
 

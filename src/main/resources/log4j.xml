@@ -36,8 +36,8 @@
 	
 	<!--  Control logging verbosity for a specific package or class -->
 	
-  <logger name="com.owlplatform">
-    <level value="warn" />
+  <logger name="com.owlplatform.sigvis">
+    <level value="debug" />
   </logger>
 	<logger name="com.owlplatform.worldmodel">
     <level value="warn" />
@@ -49,9 +49,9 @@
 	<root>
 		<priority value="debug" />
     	<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />
     <!--
     <appender-ref ref="dailyRollingFile" />
-		<appender-ref ref="rollingFile" />
     -->
 	</root>
 </log4j:configuration>

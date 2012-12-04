@@ -420,7 +420,7 @@ public class ConnectionHandler {
         success = true;
 
         for (String uri : state.getIdentifiers()) {
-
+          log.debug("Checking {}", uri);
           String sensorString = null;
           BigInteger deviceId = null;
           double x = -1;
