@@ -1,7 +1,7 @@
                     Owl Platform Signal Visualization Tools
                                   Change Log
 Version 1.0.1-SNAPSHOT
-Last updated October 22, 2012
+Last updated December 5, 2012
 
 Project Website: <https://github.com/OwlPlatform/sigvis>
 
@@ -21,6 +21,7 @@ with this software as the file LICENSE.  If not, you may download a copy from
   receivers in the system.
 
 Version 1.0.1 - TBD
+  + Fixing bug that caused some transmitters/receivers to be missing.
 
 Version 1.0.0 - October 22, 2012
   + Initial version.
