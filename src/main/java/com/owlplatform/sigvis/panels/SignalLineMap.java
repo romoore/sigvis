@@ -22,6 +22,7 @@ package com.owlplatform.sigvis.panels;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -85,13 +86,53 @@ public class SignalLineMap extends JComponent implements DisplayPanel {
     super();
     this.type = type;
     this.cache = cache;
+    this.setToolTipText("Signal Line Map");
   }
 
   @Override
   public String getToolTipText(MouseEvent me) {
+    if (this.cache.getRegionBounds() == null) {
+      return null;
+    }
 
-    return "TODO: Tool tips.";
+    Dimension panelDims = this.getSize();
 
+    double mX = me.getPoint().getX();
+    double mY = panelDims.getHeight() - me.getPoint().getY();
+
+    // X scale for Screen->Region conversion
+    double xS2R = this.cache.getRegionBounds().getMaxX() / panelDims.getWidth();
+    double yS2R = this.cache.getRegionBounds().getMaxY()
+        / panelDims.getHeight();
+
+    double rX = mX * xS2R;
+    double rY = mY * yS2R;
+    
+    float minCombined = Float.MAX_VALUE;
+    String minDevice = null;
+    
+    for(String rxer : this.cache.getReceiverIds()){
+      Point2D location = this.cache.getDeviceLocation(rxer);
+      float dist = (float)(Math.abs(location.getX()-rX) + Math.abs(location.getY()-rY));
+      if(dist < 10 && dist < minCombined){
+        minCombined = dist;
+        minDevice = rxer;
+      }
+    }
+    
+    for(String txer : this.cache.getFiduciaryTransmitterIds()){
+      Point2D location = this.cache.getDeviceLocation(txer);
+      float dist = (float)(Math.abs(location.getX()-rX) + Math.abs(location.getY()-rY));
+      if(dist < 10 && dist < minCombined){
+        minCombined = dist;
+        minDevice = txer;
+      }
+    }
+    if(minDevice != null){
+      return minDevice;
+    }
+
+    return this.cache.getRegionUri() + String.format(" (%.1f, %.1f)", rX, rY);
   }
 
   // public String

@@ -508,13 +508,37 @@ public class SignalToDistanceMap extends JComponent implements DisplayPanel {
     double mX = me.getPoint().getX();
     double mY = panelDims.getHeight() - me.getPoint().getY();
 
-    // Scale for Screen->Region conversion
+    // X scale for Screen->Region conversion
     double xS2R = this.cache.getRegionBounds().getMaxX() / panelDims.getWidth();
     double yS2R = this.cache.getRegionBounds().getMaxY()
         / panelDims.getHeight();
 
     double rX = mX * xS2R;
     double rY = mY * yS2R;
+    
+    float minCombined = Float.MAX_VALUE;
+    String minDevice = null;
+    
+    for(String rxer : this.cache.getReceiverIds()){
+      Point2D location = this.cache.getDeviceLocation(rxer);
+      float dist = (float)(Math.abs(location.getX()-rX) + Math.abs(location.getY()-rY));
+      if(dist < 10 && dist < minCombined){
+        minCombined = dist;
+        minDevice = rxer;
+      }
+    }
+    
+    for(String txer : this.cache.getFiduciaryTransmitterIds()){
+      Point2D location = this.cache.getDeviceLocation(txer);
+      float dist = (float)(Math.abs(location.getX()-rX) + Math.abs(location.getY()-rY));
+      if(dist < 10 && dist < minCombined){
+        minCombined = dist;
+        minDevice = txer;
+      }
+    }
+    if(minDevice != null){
+      return minDevice;
+    }
 
     return this.cache.getRegionUri() + String.format(" (%.1f, %.1f)", rX, rY);
   }
