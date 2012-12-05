@@ -418,8 +418,8 @@ public class ConnectionHandler {
         WorldState state = res.get();
 
         success = true;
-
-        for (String uri : state.getIdentifiers()) {
+        Collection<String> identifiers = state.getIdentifiers();
+        for (String uri : identifiers) {
           log.debug("Checking {}", uri);
           String sensorString = null;
           BigInteger deviceId = null;
@@ -460,7 +460,7 @@ public class ConnectionHandler {
             } else if (uri.contains("receiver")) {
               this.cache.addReceiver(uri);
             } else {
-              return;
+              continue;
             }
 
             this.cache.mapSensorToUri(sensorString, uri);
