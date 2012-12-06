@@ -73,7 +73,6 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * amount of time.
  * 
  * @author Robert Moore
- * 
  */
 public class DataCache2 implements Cloneable {
 
@@ -160,6 +159,13 @@ public class DataCache2 implements Cloneable {
    */
   @XStreamAlias("fiduciaryTransmitterIds")
   protected final Set<String> fiduciaryTransmitterIds = new ConcurrentHashSet<String>();
+
+  /**
+   * List of dynamic (non-configured) transmitter ID values seen from the world
+   * model.
+   */
+  @XStreamAlias("dynamicTransmitterIds")
+  protected final Set<String> dynamicTransmitterIds = new ConcurrentHashSet<String>();
 
   /**
    * Map of anchor sensor URI values to the anchor URIs.
@@ -275,6 +281,9 @@ public class DataCache2 implements Cloneable {
 
   public void addFiduciaryTransmitter(final String transmitterId) {
     this.fiduciaryTransmitterIds.add(transmitterId);
+    String justId = transmitterId.substring(transmitterId.lastIndexOf('.')+1,transmitterId.length());
+    log.info("Removing fiduciary transmitter {} from dynamic list.",justId);
+    this.dynamicTransmitterIds.remove(justId);
     this.statsPanel.setNumFidTxers(++this.numFidTxers);
     this.lastRssiUpdate = System.currentTimeMillis();
     this.lastVarianceUpdate = System.currentTimeMillis();
@@ -289,24 +298,24 @@ public class DataCache2 implements Cloneable {
     }
 
     String txer = this.sensorToUri.get(txerSensor);
+    // Enabling dynamic devices
     if (txer == null) {
-      // log.warn("Unknown transmitter sensor: " + txerSensor);
-      return;
+      txer = txerSensor;
     }
 
-    Map<String, NavigableSet<ChartItem<Float>>> transmitterItems = this.averageRssiByRByT
+    Map<String, NavigableSet<ChartItem<Float>>> receiverItems = this.averageRssiByRByT
         .get(rxer);
 
-    if (transmitterItems == null) {
-      transmitterItems = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
-      this.averageRssiByRByT.put(rxer, transmitterItems);
+    if (receiverItems == null) {
+      receiverItems = new ConcurrentHashMap<String, NavigableSet<ChartItem<Float>>>();
+      this.averageRssiByRByT.put(rxer, receiverItems);
     }
 
-    NavigableSet<ChartItem<Float>> rssiQueue = transmitterItems.get(txer);
+    NavigableSet<ChartItem<Float>> rssiQueue = receiverItems.get(txer);
     if (rssiQueue == null) {
       rssiQueue = new ConcurrentSkipListSet<ChartItem<Float>>(
           new ChartItemTimeComparator(false));
-      transmitterItems.put(txer, rssiQueue);
+      receiverItems.put(txer, rssiQueue);
     }
 
     SimpleChartItem<Float> theItem = new SimpleChartItem<Float>(
@@ -324,7 +333,17 @@ public class DataCache2 implements Cloneable {
       --this.numRssiPoints;
     }
 
-    // Signal to distance update
+    if (!this.fiduciaryTransmitterIds.contains(txerSensor)
+        && !this.dynamicTransmitterIds.contains(txerSensor)) {
+      this.dynamicTransmitterIds.add(txerSensor);
+      log.info("Added dynamic transmitter {}", txerSensor);
+      for (DataCache2Listener listener : this.listeners) {
+        listener.transmitterAdded(txerSensor, false);
+      }
+
+    }
+    
+    // Signal to distance update (only receivers and fiduciary transmitters)
     Point2D recPoint = this.getDeviceLocation(rxer);
     Point2D transPoint = this.getDeviceLocation(txer);
     if (recPoint == null || transPoint == null) {
@@ -350,6 +369,8 @@ public class DataCache2 implements Cloneable {
       history.pollFirst();
       --this.numSigToDistPoints;
     }
+
+    
     // End signal to distance
   }
 
@@ -362,9 +383,9 @@ public class DataCache2 implements Cloneable {
     }
 
     String txer = this.sensorToUri.get(txerSensor);
+    // Enabling dynamic devices
     if (txer == null) {
-      // log.warn("Unknown transmitter sensor: " + txerSensor);
-      return;
+      txer = txerSensor;
     }
 
     Map<String, NavigableSet<ChartItem<Float>>> transmitterItems = this.varianceRssiByRByT
@@ -394,6 +415,15 @@ public class DataCache2 implements Cloneable {
     while (!varQueue.isEmpty() && varQueue.first().getCreationTime() < oldestTs) {
       varQueue.pollFirst();
       --this.numVarPoints;
+    }
+    
+    if (!this.fiduciaryTransmitterIds.contains(txerSensor)
+        && !this.dynamicTransmitterIds.contains(txerSensor)) {
+      
+      log.info("Added dynamic transmitter {}", txerSensor);
+      for (DataCache2Listener listener : this.listeners) {
+        listener.transmitterAdded(txerSensor, false);
+      }
     }
   }
 
@@ -476,9 +506,14 @@ public class DataCache2 implements Cloneable {
     return this.deviceLocations.get(deviceId);
   }
 
+  /**
+   * Returns a list containing all dynamic transmitters seen from the world model
+   * since connection (or since file load).
+   * @return the list of dynamic transmitters.
+   */
   public List<String> getDynamicTransmitterIds() {
     List<String> transmitters = new LinkedList<String>();
-    // transmitters.addAll(this.dynamicTransmitterIds);
+     transmitters.addAll(this.dynamicTransmitterIds);
     return transmitters;
   }
 

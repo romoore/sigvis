@@ -343,10 +343,19 @@ public class SimpleFrame extends JFrame implements ActionListener,
 
   protected JMenu transmittersFiduciaryMenu = new JMenu("Fiduciary");
 
+  /**
+   * Menu of dynamic transmitters used as "Source" devices.
+   */
   protected JMenu transmittersDynamicMenu = new JMenu("Dynamic");
 
+  /**
+   * Map of radio buttons to object names for fiduciary transmitters as "Source" devices.
+   */
   protected ConcurrentHashMap<JRadioButtonMenuItem, String> transmitterFiduciaryItems = new ConcurrentHashMap<JRadioButtonMenuItem, String>();
 
+  /**
+   * Map of radio buttons to object names for dynamic transmitters as "Source" devices.
+   */
   protected ConcurrentHashMap<JRadioButtonMenuItem, String> transmitterDynamicItems = new ConcurrentHashMap<JRadioButtonMenuItem, String>();
 
   protected JMenu deviceMenu = new JMenu("Device");
@@ -621,62 +630,84 @@ public class SimpleFrame extends JFrame implements ActionListener,
     }
   }
 
-  protected void buildMenuTransmitters() {
+  protected synchronized void buildMenuTransmitters() {
+    
+    log.info("Rebuilding transmitter menus");
+    /*
+     * Fiduciary transmitters
+     */
+    
     // TODO: Finish me
+    // Remove all of the fiduciary transmitters radio buttons from the set of "selected devices"
     for (JMenuItem item : this.transmitterFiduciaryItems.keySet()) {
       this.selectedDeviceGroup.remove(item);
     }
+    // Clear our all sets related to fiduciary transmitters
     this.transmitterFiduciaryItems.clear();
     this.transmittersFiduciaryMenu.removeAll();
-
     this.sourceTransmitterMenuItems.clear();
     this.sourceTransmittersMenu.removeAll();
+    
+    // Re-add the "special" menu options.
     this.sourceTransmittersMenu.add(this.sourceTransmitterSelectAll);
     this.sourceTransmittersMenu.add(this.sourceTransmitterClearAll);
 
-    // Fiduciary transmitters
+    // Add back all of the fiduciary transmitters
     List<String> transmitters = this.cache.getFiduciaryTransmitterIds();
     Collections.sort(transmitters);
     for (String transmitter : transmitters) {
+      // Radio button for "selected device" group
       JRadioButtonMenuItem newSelectedItem = new JRadioButtonMenuItem(
           transmitter.toString());
+      // Checkbox for Sources menu
       JCheckBoxMenuItem newCheckedItem = new JCheckBoxMenuItem(
           transmitter.toString());
       newCheckedItem.setSelected(true);
+      // Only add to the "selected devices" group if it isn't present
       if (this.transmitterFiduciaryItems.put(newSelectedItem, transmitter) == null) {
         newSelectedItem.addActionListener(this);
         this.selectedDeviceGroup.add(newSelectedItem);
         this.transmittersFiduciaryMenu.add(newSelectedItem);
       }
+      // Only add to the "sources" group if it isn't present.
       if (this.sourceTransmitterMenuItems.put(newCheckedItem, transmitter) == null) {
         newCheckedItem.addActionListener(this);
         this.sourceTransmittersMenu.add(newCheckedItem);
       }
     }
 
+    /*
+     * Now the dynamic devices
+     */
+    // Remove the dynamic transmitters from all of the different collections
     for (JMenuItem item : this.transmitterDynamicItems.keySet()) {
       this.selectedDeviceGroup.remove(item);
     }
     this.transmitterDynamicItems.clear();
     this.transmittersDynamicMenu.removeAll();
 
-    // Dynamic transmitters
+    // Get the list of transmitters
     transmitters = this.cache.getDynamicTransmitterIds();
+    
+    // For each, add it to the appropriate menus/gruops
     for (String transmitter : transmitters) {
+      // "Source device" radio button
       JRadioButtonMenuItem newSelectedItem = new JRadioButtonMenuItem(
           transmitter.toString());
-      JCheckBoxMenuItem newCheckedItem = new JCheckBoxMenuItem(
-          transmitter.toString());
-      newCheckedItem.setSelected(true);
+//      JCheckBoxMenuItem newCheckedItem = new JCheckBoxMenuItem(
+//          transmitter.toString());
+//      newCheckedItem.setSelected(true);
+      // Add the "source" radio button to the collections/groups/menu.
       if (this.transmitterDynamicItems.put(newSelectedItem, transmitter) == null) {
         newSelectedItem.addActionListener(this);
         this.selectedDeviceGroup.add(newSelectedItem);
         this.transmittersDynamicMenu.add(newSelectedItem);
       }
-      if (this.sourceTransmitterMenuItems.put(newCheckedItem, transmitter) == null) {
-        newCheckedItem.addActionListener(this);
-        this.sourceTransmittersMenu.add(newCheckedItem);
-      }
+      // FIXME: Should dynamic devices be "allowed" as source devices?
+//      if (this.sourceTransmitterMenuItems.put(newCheckedItem, transmitter) == null) {
+//        newCheckedItem.addActionListener(this);
+//        this.sourceTransmittersMenu.add(newCheckedItem);
+//      }
 
     }
   }
